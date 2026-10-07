@@ -215,3 +215,26 @@ Con Chrome sin interfaz, emulando un teléfono táctil de 390 × 844: **36 compr
 - Publicar en GitHub Pages.
 - Instalar en el teléfono de la cancha y cargar precios, alias y rival.
 - Hacer una caja completa en modo avión con ese teléfono y compartir el cierre.
+
+## Pedido de M: atrás dos veces para salir, e instalar (07/10/2026, v7)
+
+### Qué se hizo
+
+- **Atrás dos veces para salir.** El primer "atrás" no cierra la app: muestra abajo "Tocá atrás otra vez para salir." durante 2,5 segundos, y lo que estaba en pantalla no cambia. Si se toca atrás otra vez mientras se ve el aviso, la app se cierra. Pasado ese tiempo, el próximo "atrás" vuelve a avisar.
+  - Cómo: se agrega un paso al historial del navegador que el primer "atrás" consume. Chrome ignora los pasos agregados sin que la persona toque la pantalla, así que el paso se vuelve a poner al primer toque y cuando se va el aviso.
+  - Anotado en `ESPECIFICACION.md` (sección 8, "Salir"), en los dos repos: la APK también lo necesita.
+- **Instalar.** Se le preguntó a Chrome qué le falta a la app para ser instalable, tanto en la compu como en la versión publicada en GitHub Pages: **no le falta nada**. El manifiesto no tiene errores, y el service worker y los íconos están bien. La única observación fue que la prueba corre en modo incógnito.
+  - Para que no dependa de encontrar la opción en el menú de Chrome, se agregó el botón **"Instalar la app"** en Abrir caja. Aparece solo cuando Chrome ofrece instalarla; al tocarlo abre el pedido de instalación de Chrome; no aparece si ya está instalada.
+- `APP_VERSION` v7 / `CACHE_NAME` entradas-v7.
+
+### Qué se probó
+
+- Con Chrome sin interfaz, emulando un teléfono táctil: **15 comprobaciones, todas bien.**
+  - Primer atrás: la app sigue y avisa, sin perder lo elegido. El aviso se va solo. Después de eso, atrás vuelve a avisar. Segundo atrás con el aviso a la vista: sale. Con la caja abierta, en Ventas, atrás avisa y la app sigue ahí.
+  - Instalar (con el pedido de Chrome simulado): sin pedido no hay botón; con pedido aparece "Instalar la app"; al tocarlo se abre el pedido de Chrome y el botón se va; ya instalada no aparece; si el pedido llega mientras se escribe, no se pierde el foco.
+- Se volvieron a correr W2 (58), W3 (36), W4 (59) y W5 (51): todo bien.
+
+### Falta
+
+- Probar "atrás" en el teléfono, con la app instalada. Chrome de escritorio no tiene botón atrás de teléfono, así que el cierre real de la app solo se puede ver en Android.
+- Ver el botón "Instalar la app" en el teléfono. Chrome lo ofrece solo si la app todavía no está instalada. Si antes se agregó como acceso directo ("Agregar a pantalla principal"), conviene borrar ese acceso directo.

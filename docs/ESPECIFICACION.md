@@ -203,6 +203,10 @@ La app **no verifica** transferencias. Se anotan y se concilian después contra 
 - La caja cerrada no se modifica más, pero se tiene que poder volver a ver y a imprimir su cierre.
 - Los botones, precios y datos de transferencia se conservan de una caja a la otra.
 
+### Salir
+
+- El botón "atrás" del teléfono no cierra la app de un toque: el primero muestra "Tocá atrás otra vez para salir." y, si se toca de nuevo mientras se ve ese aviso, la app se cierra. Lo que estaba en pantalla no cambia.
+
 ## 9. Cierre de caja
 
 Informe con forma de ticket. Todo sale de las ventas **no anuladas**, usando la copia guardada en cada venta.

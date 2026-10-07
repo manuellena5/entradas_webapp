@@ -331,11 +331,21 @@ html { touch-action: manipulation; }
   font-size: 17px; font-weight: 700; text-align: center;
 }
 #aviso-version[hidden] { display: none; }
+#aviso-salir {
+  position: fixed; left: 50%; bottom: 84px; z-index: 31;
+  transform: translateX(-50%);
+  width: max-content; max-width: calc(100% - 24px);
+  padding: 12px 18px; border-radius: var(--radio-campo);
+  background: var(--tinta); color: #FFFFFF;
+  font-size: 17px; font-weight: 700; text-align: center; pointer-events: none;
+}
+#aviso-salir[hidden] { display: none; }
 </style>
 </head>
 <body>
 <div id="app"></div>
 <button type="button" id="aviso-version" hidden>Hay una versión nueva. Tocá para actualizar.</button>
+<div id="aviso-salir" role="status" hidden>Tocá atrás otra vez para salir.</div>
 
 <script id="reglas">
 // Reglas puras: no tocan la página. tests.html las carga desde acá.
@@ -725,7 +735,7 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v6';
+const APP_VERSION = 'v7';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
@@ -796,6 +806,7 @@ function pantallaAbrir() {
       </div>
       ${precios.map((b) => `<div class="fila"><span>${esc(b.nombre)}</span><b>${plata(b.precio)}</b></div>`).join('')}
     </div>
+    ${pedidoInstalar ? '<button type="button" class="b-chico b-ancho" data-accion="instalar">Instalar la app</button>' : ''}
     ${historial.length ? '<button type="button" class="b-chico b-ancho" data-accion="ir" data-valor="cajas">Cajas cerradas</button>' : ''}
     <div class="error" ${ui.error ? '' : 'hidden'}>${esc(ui.error)}</div>
     <div class="relleno"></div>
@@ -1353,6 +1364,13 @@ const acciones = {
     ui.editar = null;
     ui.error = '';
   },
+  async instalar() {
+    const pedido = pedidoInstalar;
+    if (!pedido) return;
+    pedidoInstalar = null;
+    pedido.prompt();
+    try { await pedido.userChoice; } catch (e) { /* nada */ }
+  },
   pedirCerrar() { ui.cerrando = true; ui.mensaje = ''; ui.error = ''; },
   noCerrar() { ui.cerrando = false; ui.mensaje = ''; ui.error = ''; },
   cerrarCaja() {
@@ -1486,6 +1504,45 @@ async function pantallaEncendida() {
   } catch (e) { /* sin permiso: sigue igual */ }
 }
 document.addEventListener('visibilitychange', pantallaEncendida);
+
+// ---------- Instalar ----------
+// Chrome avisa cuando la app se puede instalar; se guarda el pedido para el botón de Abrir caja.
+let pedidoInstalar = null;
+const sinEscribir = () => !document.activeElement || document.activeElement.tagName !== 'INPUT';
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  pedidoInstalar = e;
+  if (sinEscribir()) render();
+});
+window.addEventListener('appinstalled', () => {
+  pedidoInstalar = null;
+  if (sinEscribir()) render();
+});
+
+// ---------- Atrás dos veces para salir ----------
+// Se agrega un paso al historial: el primer "atrás" lo consume y avisa. Si se toca
+// atrás otra vez mientras se ve el aviso, no queda nada que consumir y el teléfono cierra la app.
+// Chrome ignora los pasos agregados sin que la persona toque la pantalla, por eso se
+// vuelve a poner al primer toque.
+const avisoSalir = document.getElementById('aviso-salir');
+let trampa = false;
+let tiempoSalir = null;
+function ponerTrampa() {
+  if (trampa) return;
+  history.pushState({ entradas: true }, '');
+  trampa = true;
+}
+document.addEventListener('pointerdown', () => { if (!tiempoSalir) ponerTrampa(); }, true);
+window.addEventListener('popstate', () => {
+  trampa = false;
+  avisoSalir.hidden = false;
+  clearTimeout(tiempoSalir);
+  tiempoSalir = setTimeout(() => {
+    avisoSalir.hidden = true;
+    tiempoSalir = null;
+    ponerTrampa();
+  }, 2500);
+});
 
 render();
 pantallaEncendida();
