@@ -84,7 +84,7 @@ El contador sobre el botón usa el color del texto como fondo, y tinta o blanco 
 | Botón extra | 112 px de alto, borde de 2 px tinta, radio 18 |
 | Botón "no paga" | 68 px de alto, radio 14 |
 | Efectivo / Transferencia | 84 px de alto, radio 16 |
-| Contador y botón "−" | círculos de 46–50 px |
+| Contador y botón "−" | círculos de 46–50 px. En los de entrada, arriba: el número a la izquierda y el "−" a la derecha. En los extras, contra el borde derecho: el número arriba y el "−" abajo. En los que no pagan, a la derecha, uno al lado del otro. Nunca tapan el nombre |
 | Campos de texto | 52–60 px de alto, borde de 2 px tinta, radio 12 |
 | Barra de pestañas | 64 px, borde superior de 2 px tinta |
 | Panel inferior | esquinas superiores con radio 22 |
@@ -103,7 +103,7 @@ El contador sobre el botón usa el color del texto como fondo, y tinta o blanco 
 ## Pantallas
 
 1. **Abrir caja.** Club arriba en chico, título grande, Local / Visitante, rival, plata para vuelto, tarjeta con los precios del día y botón "Configurar", botón verde "Abrir caja" abajo.
-2. **Vender.** Barra con el rival, Local o Visitante, botón "Alias" y cuántos ingresaron. Selector de socio si está activado. Botones en dos columnas: entradas, extras, y bajo el título "No pagan entrada" los grises. Franja blanca con resumen y total. Efectivo y Transferencia. Pestañas.
+2. **Vender.** Barra con el rival, Local o Visitante, botón "Alias" y cuántos ingresaron. Selector de socio si está activado. Botones en dos columnas: entradas y extras. Bajo el título "No pagan entrada", los grises van uno por fila, a lo ancho: en dos columnas el contador taparía el nombre (cambio respecto del prototipo, aprobado por M). Franja blanca con resumen y total. Efectivo y Transferencia. Pestañas.
 3. **Cobrado** (panel). Ver sección 6 de la especificación.
 4. **Alias** (panel). Alias en 44 px para que se lea a un metro.
 5. **Ventas.** Tarjetas blancas, una por venta. Las anuladas en gris, tachadas.

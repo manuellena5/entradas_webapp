@@ -198,6 +198,46 @@ html { touch-action: manipulation; }
 .cobrar .b-transf { font-size: 28px; }
 .vender-error { padding: 8px 12px 0; background: var(--superficie); }
 
+/* ---------- Pestañas ---------- */
+.pestanas { flex-shrink: 0; height: var(--alto-tabs); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 2px solid var(--tinta); background: var(--superficie); }
+.pestana { border: 0; background: var(--superficie); color: var(--tinta); font-family: var(--f-titulo); font-weight: 700; font-size: 24px; text-transform: uppercase; }
+.pestana[aria-pressed="true"] { background: var(--tinta); color: #FFFFFF; }
+.barra-simple { justify-content: space-between; padding: 14px 16px; }
+.barra-grande { font-family: var(--f-titulo); font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase; }
+.barra-dato { font-size: 15px; color: var(--texto-2-barra); }
+
+/* ---------- Ventas ---------- */
+.lista { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.vacio { padding: 32px 12px; text-align: center; font-size: 18px; color: var(--texto-2); }
+.venta { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--superficie); }
+.venta.anulada { background: var(--panel); }
+.venta-izq { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.venta-resumen { font-size: 17px; font-weight: 600; }
+.venta-dato { font-size: 14px; color: var(--texto-2-gris); }
+.venta-der { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.venta-total { font-family: var(--f-titulo); font-weight: 700; font-size: 26px; line-height: 1; }
+.venta.anulada .venta-resumen, .venta.anulada .venta-total { text-decoration: line-through; }
+.b-anular { height: 44px; padding: 0 14px; border: 2px solid var(--rojo); border-radius: 10px; background: var(--superficie); color: var(--rojo); font-size: 15px; font-weight: 700; }
+.b-anular[aria-pressed="true"] { background: var(--rojo); color: #FFFFFF; }
+.marca-anulada { font-size: 14px; font-weight: 700; color: var(--rojo); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---------- Cierre ---------- */
+.cierre { padding: 14px 12px 16px; display: flex; flex-direction: column; gap: 14px; }
+.papel { padding: 18px 16px; background: var(--superficie); border-radius: 4px; font-family: var(--f-papel); font-size: 14px; line-height: 1.75; }
+.papel .c { text-align: center; }
+.papel .f { font-weight: 600; }
+.corte { border-top: 1px dashed var(--tinta); margin: 8px 0; }
+.z-fila { display: flex; gap: 8px; }
+.z-n { flex: 1; min-width: 0; }
+.z-q { width: 36px; text-align: right; }
+.z-m { width: 104px; text-align: right; }
+.z-m2 { width: 120px; text-align: right; }
+.z-detalle { font-size: 13px; }
+.z-detalle .z-n { padding-left: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.z-m3 { width: 96px; text-align: right; }
+.z-total { font-size: 17px; }
+.z-m4 { width: 130px; text-align: right; }
+
 /* ---------- Paneles ---------- */
 .velo { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; justify-content: flex-end; background: var(--velo); }
 .panel {
@@ -565,7 +605,7 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v3';
+const APP_VERSION = 'v4';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
@@ -579,6 +619,8 @@ const ui = {
   cobrada: null,       // id de la venta que muestra el panel Cobrado
   pagaCon: 0,
   alias: false,
+  pantalla: 'vender',  // con la caja abierta: vender, ventas o cierre
+  confirmar: null,     // id de la venta que muestra "¿Anular?"
   error: ''
 };
 
@@ -714,6 +756,92 @@ function pantallaVender() {
           <button type="button" class="boton-grande b-efectivo" data-accion="cobrar" data-valor="efectivo" ${bloqueo}>Efectivo</button>
           <button type="button" class="boton-grande b-oscuro b-transf" data-accion="cobrar" data-valor="transferencia" ${bloqueo}>Transferencia</button>
         </div>`}
+    ${pestanas()}
+  </div>`;
+}
+
+function pestanas() {
+  const p = (id, txt) => `<button type="button" class="pestana" data-accion="ir" data-valor="${id}" aria-pressed="${ui.pantalla === id}">${txt}</button>`;
+  return `<div class="pestanas">${p('vender', 'Vender')}${p('ventas', 'Ventas')}${p('cierre', 'Cierre')}</div>`;
+}
+
+function barraSimple(titulo, dato) {
+  return `<div class="barra barra-simple"><div class="barra-grande">${titulo}</div><div class="barra-dato">${dato}</div></div>`;
+}
+
+function tarjetaVenta(v) {
+  const anulada = !!v.anuladaEn;
+  const pide = ui.confirmar === v.id;
+  return `<div class="venta${anulada ? ' anulada' : ''}">
+    <div class="venta-izq">
+      <div class="venta-resumen">${esc(resumenLineas(v.lineas))}</div>
+      <div class="venta-dato">${horaTxt(v.fechaHora)} · ${esc(medioTxt(v))}</div>
+    </div>
+    <div class="venta-der">
+      <div class="venta-total">${plata(v.total)}</div>
+      ${anulada
+        ? '<div class="marca-anulada">Anulada</div>'
+        : `<button type="button" class="b-anular" data-accion="anular" data-valor="${v.id}" aria-pressed="${pide}">${pide ? '¿Anular?' : 'Anular'}</button>`}
+    </div>
+  </div>`;
+}
+
+function pantallaVentas() {
+  const activas = caja.ventas.filter((v) => !v.anuladaEn).length;
+  const lista = caja.ventas.slice().reverse();
+  return `
+  <div class="pantalla">
+    ${barraSimple('Ventas', cantidadDe(activas, 'venta'))}
+    <div class="desplaza lista">
+      ${lista.length ? lista.map(tarjetaVenta).join('') : '<div class="vacio">Todavía no hay ventas.</div>'}
+    </div>
+    ${ui.error ? `<div class="vender-error"><div class="error">${esc(ui.error)}</div></div>` : ''}
+    ${pestanas()}
+  </div>`;
+}
+
+// El informe con forma de ticket (sección 9 de la especificación).
+function papelCierre(c) {
+  const z = calcularCierre(c, c.botones);
+  const fila = (n, q, m, clase) => `<div class="z-fila ${clase || ''}"><span class="z-n">${esc(n)}</span><span class="z-q">${q}</span><span class="z-m">${m}</span></div>`;
+  const plataFila = (n, m, clase) => `<div class="z-fila ${clase || ''}"><span class="z-n">${esc(n)}</span><span class="z-m2">${m}</span></div>`;
+  const corte = '<div class="corte"></div>';
+  return `<div class="papel">
+    <div class="c f" style="font-size: 15px">${esc(config.club.toUpperCase())}</div>
+    <div class="c">CIERRE DE ENTRADAS</div>
+    <div class="c">${esc(partidoTxt(c.rival))} · ${condicionTxt(c.condicion)}</div>
+    <div class="c">${fechaTxt(c.abiertaEn)}</div>
+    ${corte}
+    <div class="f">ENTRADAS</div>
+    ${z.entradas.map((f) => fila(f.nombre, f.cantidad, plata(f.monto))).join('')}
+    ${fila('Subtotal', z.entradasCantidad, plata(z.entradasMonto), 'f')}
+    ${z.extras.length ? corte + z.extras.map((f) => fila(f.nombre, f.cantidad, plata(f.monto))).join('') : ''}
+    ${corte}
+    <div class="f">SIN CARGO</div>
+    ${z.gratis.map((f) => fila(f.nombre, f.cantidad, '')).join('')}
+    ${fila('Ingresaron en total', z.personas, '', 'f')}
+    ${corte}
+    <div class="f">COBRADO</div>
+    ${plataFila('Efectivo', plata(z.efectivo))}
+    ${plataFila('Transferencia', plata(z.transferencia))}
+    ${z.transferencias.map((t) => `<div class="z-fila z-detalle"><span class="z-n">${t.hora} ${esc(t.nombre)}</span><span class="z-m3">${plata(t.monto)}</span></div>`).join('')}
+    <div class="z-fila f z-total"><span class="z-n">TOTAL</span><span class="z-m4">${plata(z.total)}</span></div>
+    ${corte}
+    <div class="f">EFECTIVO EN CAJA</div>
+    ${plataFila('Para vuelto', plata(z.fondo))}
+    ${plataFila('Ventas', plata(z.efectivo))}
+    ${plataFila('Tiene que haber', plata(z.esperado), 'f')}
+    ${corte}
+    ${fila('Ventas anuladas', z.anuladas, plata(z.anuladoMonto))}
+  </div>`;
+}
+
+function pantallaCierre() {
+  return `
+  <div class="pantalla">
+    ${barraSimple('Cierre de caja', condicionTxt(caja.condicion))}
+    <div class="desplaza cierre">${papelCierre(caja)}</div>
+    ${pestanas()}
   </div>`;
 }
 
@@ -788,15 +916,22 @@ function panelAlias() {
   </div>`;
 }
 
+// Cada pantalla recuerda hasta dónde se bajó.
+const desplazado = {};
+
 function render() {
-  const zona = app.querySelector('.zona-botones');
-  const scroll = zona ? zona.scrollTop : 0;
-  let html = caja ? pantallaVender() : pantallaAbrir();
+  const antes = app.querySelector('.desplaza');
+  if (antes) desplazado[antes.dataset.pantalla] = antes.scrollTop;
+  const pantalla = !caja ? 'abrir' : ui.pantalla;
+  let html = { abrir: pantallaAbrir, vender: pantallaVender, ventas: pantallaVentas, cierre: pantallaCierre }[pantalla]();
   if (caja && ui.cobrada) html += panelCobrado();
-  else if (caja && ui.alias) html += panelAlias();
+  else if (caja && ui.alias && pantalla === 'vender') html += panelAlias();
   app.innerHTML = html;
-  const nueva = app.querySelector('.zona-botones');
-  if (nueva) nueva.scrollTop = scroll;
+  const ahoraZona = app.querySelector('.desplaza');
+  if (ahoraZona) {
+    ahoraZona.dataset.pantalla = pantalla;
+    ahoraZona.scrollTop = desplazado[pantalla] || 0;
+  }
 }
 
 // ---------- Acciones ----------
@@ -810,6 +945,7 @@ const acciones = {
     caja = nueva;
     ui.abrir = { condicion: 'local', rival: '', fondo: '' };
     ui.carrito = {};
+    ui.pantalla = 'vender';
     ui.error = '';
     pantallaEncendida();
   },
@@ -839,6 +975,17 @@ const acciones = {
   },
   pagaCon(v) { ui.pagaCon = Number(v); },
   siguiente() { ui.cobrada = null; ui.cobrando = false; ui.pagaCon = 0; },
+  ir(pantalla) { ui.pantalla = pantalla; ui.alias = false; ui.error = ''; },
+  // Primer toque: "¿Anular?". Segundo toque en la misma venta: anula.
+  anular(id) {
+    id = Number(id);
+    if (ui.confirmar !== id) { ui.confirmar = id; return; }
+    const nueva = anularVenta(caja, id, ahora());
+    if (!G.guardarCaja(nueva)) { ui.error = 'No se pudo anular. Probá de nuevo.'; return; }
+    caja = nueva;
+    ui.confirmar = null;
+    ui.error = '';
+  },
   verAlias() { ui.alias = true; },
   cerrarAlias() { ui.alias = false; }
 };
@@ -848,6 +995,8 @@ app.addEventListener('click', (e) => {
   if (!el || el.disabled) return;
   // Bloquear los botones de cobrar apenas se tocan, antes de cualquier otra cosa.
   if (el.dataset.accion === 'cobrar') app.querySelectorAll('[data-accion="cobrar"]').forEach((b) => { b.disabled = true; });
+  // Tocar cualquier otra cosa cancela el "¿Anular?".
+  if (el.dataset.accion !== 'anular') ui.confirmar = null;
   acciones[el.dataset.accion](el.dataset.valor);
   render();
 });
