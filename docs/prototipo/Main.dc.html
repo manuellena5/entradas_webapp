@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Entradas en la cancha</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: {{altoPx}}; box-sizing: border-box; position: relative; overflow: hidden; background: #EEF0EA; color: #12161C; font-family: 'Barlow', system-ui, sans-serif">
+
+<sc-if value="{{esAbrir}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; gap: 16px; padding: 24px 20px 20px; box-sizing: border-box; overflow-y: auto">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #4A5560">Club Deportivo Mitre · Fútbol Mayor</div>
+<h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 42px; line-height: 0.95; text-transform: uppercase">Abrir caja de entradas</h1>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 17px; font-weight: 600">¿Dónde se juega?</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button type="button" onClick="{{setLocal}}" aria-pressed="{{esLocal}}" style="height: 80px; border: 2px solid #12161C; border-radius: 16px; background: {{loc.bg}}; color: {{loc.fg}}; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; text-transform: uppercase; cursor: pointer">Local</button>
+<button type="button" onClick="{{setVisitante}}" aria-pressed="{{esVisitante}}" style="height: 80px; border: 2px solid #12161C; border-radius: 16px; background: {{vis.bg}}; color: {{vis.fg}}; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; text-transform: uppercase; cursor: pointer">Visitante</button>
+</div>
+<div style="font-size: 15px; color: #4A5560">{{ayudaCondicion}}</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="rival" style="font-size: 17px; font-weight: 600">Rival</label>
+<input id="rival" type="text" value="{{rival}}" onChange="{{setRival}}" autocomplete="off" style="height: 56px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 16px; font-family: inherit; font-size: 22px; font-weight: 600">
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="fondo" style="font-size: 17px; font-weight: 600">Plata para dar vuelto</label>
+<input id="fondo" type="number" value="{{fondo}}" onChange="{{setFondo}}" placeholder="0" style="height: 56px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 16px; font-family: inherit; font-size: 22px; font-weight: 600">
+</div>
+
+<div style="padding: 12px 16px 8px; border-radius: 12px; background: #DDE1D7">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 6px">
+<div style="font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #3A444D">Precios de hoy</div>
+<button type="button" onClick="{{irConfig}}" style="height: 44px; padding: 0 14px; border: 2px solid #12161C; border-radius: 10px; background: #FFFFFF; color: #12161C; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Configurar</button>
+</div>
+<sc-for list="{{preciosHoy}}" as="p" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; padding: 3px 0; font-size: 18px"><span>{{p.nombre}}</span><span style="font-weight: 700">{{p.precio}}</span></div>
+</sc-for>
+</div>
+
+<div style="flex: 1; min-height: 4px"></div>
+<button type="button" onClick="{{abrir}}" style="height: 72px; flex-shrink: 0; border: 0; border-radius: 16px; background: #1C6B43; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; text-transform: uppercase; letter-spacing: 0.02em; cursor: pointer">Abrir caja</button>
+</div>
+</sc-if>
+
+<sc-if value="{{esConfig}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: #12161C; color: #FFFFFF">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase">Configurar</div>
+<button type="button" onClick="{{irAbrir}}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #FFFFFF; color: #12161C; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer">Listo</button>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 6px 12px 20px">
+<sc-for list="{{cfgRows}}" as="r" hint-placeholder-count="6">
+<div>
+<sc-if value="{{r.esTitulo}}" hint-placeholder-val="{{false}}">
+<div style="padding: 14px 4px 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4A5560">{{r.txt}}</div>
+</sc-if>
+<sc-if value="{{r.esItem}}" hint-placeholder-val="{{true}}">
+<div style="padding-bottom: 8px">
+<button type="button" onClick="{{r.editar}}" style="width: 100%; min-height: 64px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 0; border-radius: 12px; background: {{r.bg}}; color: #12161C; font-family: inherit; text-align: left; cursor: pointer">
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 20px; font-weight: 700">{{r.nombre}}</span>
+<span style="font-size: 14px; color: #3A444D">{{r.detalle}}</span>
+</span>
+<span style="flex-shrink: 0; font-size: 15px; font-weight: 700">{{r.accion}}</span>
+</button>
+</div>
+</sc-if>
+<sc-if value="{{r.esAgregar}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{r.agregar}}" style="width: 100%; height: 52px; border: 2px dashed #12161C; border-radius: 12px; background: transparent; color: #12161C; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer">{{r.txt}}</button>
+</sc-if>
+</div>
+</sc-for>
+
+<div style="padding: 14px 4px 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4A5560">Socios</div>
+<button type="button" onClick="{{toggleSocios}}" aria-pressed="{{sociosOn}}" style="width: 100%; min-height: 64px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 0; border-radius: 12px; background: #FFFFFF; color: #12161C; font-family: inherit; text-align: left; cursor: pointer">
+<span style="font-size: 18px; font-weight: 600">Precio distinto para socios</span>
+<span style="flex-shrink: 0; min-width: 52px; padding: 6px 12px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 10px; background: {{sociosPill.bg}}; color: {{sociosPill.fg}}; font-size: 16px; font-weight: 700; text-align: center">{{sociosTxt}}</span>
+</button>
+
+<div style="padding: 14px 4px 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4A5560">Datos para transferir</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="tr-alias" style="font-size: 16px; font-weight: 600">Alias</label>
+<input id="tr-alias" type="text" value="{{transf.alias}}" onChange="{{setAlias}}" autocomplete="off" style="height: 52px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: inherit; font-size: 19px; font-weight: 600">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="tr-titular" style="font-size: 16px; font-weight: 600">A nombre de</label>
+<input id="tr-titular" type="text" value="{{transf.titular}}" onChange="{{setTitular}}" autocomplete="off" style="height: 52px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: inherit; font-size: 19px; font-weight: 600">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="tr-banco" style="font-size: 16px; font-weight: 600">Banco o billetera</label>
+<input id="tr-banco" type="text" value="{{transf.banco}}" onChange="{{setBanco}}" autocomplete="off" style="height: 52px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: inherit; font-size: 19px; font-weight: 600">
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{esVender}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 64px; left: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: #12161C; color: #FFFFFF">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{partidoTxt}}</div>
+<div style="font-size: 14px; color: #C9CFC6">{{condicionTxt}} · Caja abierta</div>
+</div>
+<button type="button" onClick="{{verAlias}}" style="flex-shrink: 0; height: 44px; padding: 0 14px; border: 2px solid #FFFFFF; border-radius: 10px; background: transparent; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Alias</button>
+<div style="text-align: right; flex-shrink: 0">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1">{{z.personas}}</div>
+<div style="font-size: 13px; color: #C9CFC6">ingresaron</div>
+</div>
+</div>
+
+<sc-if value="{{sociosOn}}" hint-placeholder-val="{{false}}">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px 12px 0">
+<button type="button" onClick="{{setNoSocio}}" aria-pressed="{{esNoSocio}}" style="height: 48px; border: 2px solid #12161C; border-radius: 12px; background: {{nos.bg}}; color: {{nos.fg}}; font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer">No socio</button>
+<button type="button" onClick="{{setSocio}}" aria-pressed="{{esSocio}}" style="height: 48px; border: 2px solid #12161C; border-radius: 12px; background: {{soc.bg}}; color: {{soc.fg}}; font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer">Socio</button>
+</div>
+</sc-if>
+
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 12px 12px 2px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-bottom: 10px">
+<sc-for list="{{principales}}" as="it" hint-placeholder-count="2">
+<div style="position: relative">
+<button type="button" onClick="{{it.add}}" style="width: 100%; height: {{it.alto}}; box-sizing: border-box; border: 0; border-radius: 18px; background: {{it.bg}}; color: {{it.fg}}; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 4px; padding: 14px; overflow: hidden; font-family: inherit; text-align: left; cursor: pointer">
+<span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 42px; line-height: 0.95; text-transform: uppercase">{{it.nombre}}</span>
+<span style="font-size: 22px; font-weight: 600">{{it.precioTxt}}</span>
+</button>
+<sc-if value="{{it.has}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: center; pointer-events: none">
+<span style="min-width: 50px; height: 50px; box-sizing: border-box; padding: 0 10px; border-radius: 25px; background: {{it.badgeBg}}; color: {{it.badgeFg}}; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px">{{it.qty}}</span>
+<button type="button" onClick="{{it.sub}}" aria-label="{{it.quitar}}" style="pointer-events: auto; width: 50px; height: 50px; border: 2px solid {{it.fg}}; border-radius: 25px; background: {{it.bg}}; color: {{it.fg}}; font-family: inherit; font-size: 30px; font-weight: 700; line-height: 1; cursor: pointer">−</button>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{hayExtras}}" hint-placeholder-val="{{true}}">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-bottom: 10px">
+<sc-for list="{{extras}}" as="it" hint-placeholder-count="2">
+<div style="position: relative">
+<button type="button" onClick="{{it.add}}" style="width: 100%; height: 112px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 18px; background: #FFFFFF; color: #12161C; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 2px; padding: 12px 14px; overflow: hidden; font-family: inherit; text-align: left; cursor: pointer">
+<span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 0.95; text-transform: uppercase">{{it.nombre}}</span>
+<span style="font-size: 19px; font-weight: 600">{{it.precioTxt}}</span>
+</button>
+<sc-if value="{{it.has}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: center; pointer-events: none">
+<span style="min-width: 46px; height: 46px; box-sizing: border-box; padding: 0 10px; border-radius: 23px; background: #12161C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px">{{it.qty}}</span>
+<button type="button" onClick="{{it.sub}}" aria-label="{{it.quitar}}" style="pointer-events: auto; width: 46px; height: 46px; border: 2px solid #12161C; border-radius: 23px; background: #FFFFFF; color: #12161C; font-family: inherit; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer">−</button>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{hayGratis}}" hint-placeholder-val="{{true}}">
+<div>
+<div style="padding-bottom: 6px; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4A5560">No pagan entrada</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-bottom: 10px">
+<sc-for list="{{gratis}}" as="it" hint-placeholder-count="2">
+<div style="position: relative">
+<button type="button" onClick="{{it.add}}" style="width: 100%; height: 68px; box-sizing: border-box; border: 0; border-radius: 14px; background: #D3D9CC; color: #12161C; display: flex; align-items: center; padding: 0 14px; overflow: hidden; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; text-align: left; cursor: pointer">{{it.nombre}}</button>
+<sc-if value="{{it.has}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 11px; right: 10px; display: flex; gap: 6px; align-items: center; pointer-events: none">
+<span style="min-width: 46px; height: 46px; box-sizing: border-box; padding: 0 8px; border-radius: 23px; background: #12161C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px">{{it.qty}}</span>
+<button type="button" onClick="{{it.sub}}" aria-label="{{it.quitar}}" style="pointer-events: auto; width: 46px; height: 46px; border: 2px solid #12161C; border-radius: 23px; background: #D3D9CC; color: #12161C; font-family: inherit; font-size: 26px; font-weight: 700; line-height: 1; cursor: pointer">−</button>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+
+<div style="display: flex; align-items: center; gap: 12px; padding: 8px 16px; border-top: 2px solid #12161C; background: #FFFFFF">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 15px; color: #4A5560; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{resumen}}</div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 44px; line-height: 1">{{totalTxt}}</div>
+</div>
+<sc-if value="{{hayItems}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{clear}}" style="height: 48px; padding: 0 16px; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer">Borrar</button>
+</sc-if>
+</div>
+
+<sc-if value="{{modoPago}}" hint-placeholder-val="{{true}}">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 10px 12px 12px; background: #FFFFFF; opacity: {{payOp}}">
+<button type="button" onClick="{{cobrarEfectivo}}" style="height: 84px; border: 0; border-radius: 16px; background: #1C6B43; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; text-transform: uppercase; cursor: pointer">Efectivo</button>
+<button type="button" onClick="{{cobrarTransferencia}}" style="height: 84px; border: 0; border-radius: 16px; background: #12161C; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; cursor: pointer">Transferencia</button>
+</div>
+</sc-if>
+<sc-if value="{{modoGratis}}" hint-placeholder-val="{{false}}">
+<div style="padding: 10px 12px 12px; background: #FFFFFF">
+<button type="button" onClick="{{cobrarEfectivo}}" style="width: 100%; height: 84px; border: 0; border-radius: 16px; background: #12161C; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; text-transform: uppercase; cursor: pointer">Anotar sin cargo</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{esVentas}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 64px; left: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #12161C; color: #FFFFFF">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase">Ventas</div>
+<div style="font-size: 15px; color: #C9CFC6">{{ventasTxt}}</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 12px">
+<sc-if value="{{sinVentas}}" hint-placeholder-val="{{false}}">
+<div style="padding: 32px 12px; text-align: center; font-size: 18px; color: #4A5560">Todavía no hay ventas.</div>
+</sc-if>
+<sc-for list="{{ventasView}}" as="v" hint-placeholder-count="3">
+<div style="padding-bottom: 8px">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: {{v.bg}}">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<div style="font-size: 17px; font-weight: 600; text-decoration: {{v.deco}}">{{v.resumen}}</div>
+<div style="font-size: 14px; color: #3A444D">{{v.hora}} · {{v.medio}}</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; text-decoration: {{v.deco}}">{{v.total}}</div>
+<sc-if value="{{v.activa}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{v.anular}}" style="height: 44px; padding: 0 14px; border: 2px solid #A32A1E; border-radius: 10px; background: {{v.btnBg}}; color: {{v.btnFg}}; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">{{v.btn}}</button>
+</sc-if>
+<sc-if value="{{v.anulada}}" hint-placeholder-val="{{false}}">
+<div style="font-size: 14px; font-weight: 700; color: #A32A1E; text-transform: uppercase; letter-spacing: 0.04em">Anulada</div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{esCierre}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 64px; left: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #12161C; color: #FFFFFF">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; text-transform: uppercase">Cierre de caja</div>
+<div style="font-size: 15px; color: #C9CFC6">{{condicionTxt}}</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 14px 12px 16px">
+
+<div style="padding: 18px 16px; background: #FFFFFF; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 1.75; box-shadow: 0 1px 0 #C9CFC6">
+<div style="text-align: center; font-weight: 600; font-size: 15px">CLUB DEPORTIVO MITRE</div>
+<div style="text-align: center">CIERRE DE ENTRADAS</div>
+<div style="text-align: center">{{partidoTxt}} · {{condicionTxt}}</div>
+<div style="text-align: center">{{fechaTxt}}</div>
+<div style="border-top: 1px dashed #12161C; margin: 8px 0"></div>
+<div style="font-weight: 600">ENTRADAS</div>
+<sc-for list="{{z.entradas}}" as="f" hint-placeholder-count="2">
+<div style="display: flex; gap: 8px"><span style="flex: 1">{{f.nombre}}</span><span style="width: 36px; text-align: right">{{f.q}}</span><span style="width: 104px; text-align: right">{{f.m}}</span></div>
+</sc-for>
+<div style="display: flex; gap: 8px; font-weight: 600"><span style="flex: 1">Subtotal</span><span style="width: 36px; text-align: right">{{z.entradasQ}}</span><span style="width: 104px; text-align: right">{{z.entradasM}}</span></div>
+<sc-if value="{{z.hayExtras}}" hint-placeholder-val="{{true}}">
+<div>
+<div style="border-top: 1px dashed #12161C; margin: 8px 0"></div>
+<sc-for list="{{z.extras}}" as="f" hint-placeholder-count="2">
+<div style="display: flex; gap: 8px"><span style="flex: 1">{{f.nombre}}</span><span style="width: 36px; text-align: right">{{f.q}}</span><span style="width: 104px; text-align: right">{{f.m}}</span></div>
+</sc-for>
+</div>
+</sc-if>
+<div style="border-top: 1px dashed #12161C; margin: 8px 0"></div>
+<div style="font-weight: 600">SIN CARGO</div>
+<sc-for list="{{z.gratis}}" as="f" hint-placeholder-count="2">
+<div style="display: flex; gap: 8px"><span style="flex: 1">{{f.nombre}}</span><span style="width: 36px; text-align: right">{{f.q}}</span><span style="width: 104px"></span></div>
+</sc-for>
+<div style="display: flex; gap: 8px; font-weight: 600"><span style="flex: 1">Ingresaron en total</span><span style="width: 36px; text-align: right">{{z.personas}}</span><span style="width: 104px"></span></div>
+<div style="border-top: 1px dashed #12161C; margin: 8px 0"></div>
+<div style="font-weight: 600">COBRADO</div>
+<div style="display: flex; gap: 8px"><span style="flex: 1">Efectivo</span><span style="width: 120px; text-align: right">{{z.efectivo}}</span></div>
+<div style="display: flex; gap: 8px"><span style="flex: 1">Transferencia</span><span style="width: 120px; text-align: right">{{z.transferencia}}</span></div>
+<sc-for list="{{z.transfs}}" as="f" hint-placeholder-count="1">
+<div style="display: flex; gap: 8px; font-size: 13px"><span style="flex: 1; min-width: 0; padding-left: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.txt}}</span><span style="width: 96px; text-align: right">{{f.m}}</span></div>
+</sc-for>
+<div style="display: flex; gap: 8px; font-weight: 600; font-size: 17px"><span style="flex: 1">TOTAL</span><span style="width: 130px; text-align: right">{{z.total}}</span></div>
+<div style="border-top: 1px dashed #12161C; margin: 8px 0"></div>
+<div style="font-weight: 600">EFECTIVO EN CAJA</div>
+<div style="display: flex; gap: 8px"><span style="flex: 1">Para vuelto</span><span style="width: 120px; text-align: right">{{z.fondo}}</span></div>
+<div style="display: flex; gap: 8px"><span style="flex: 1">Ventas</span><span style="width: 120px; text-align: right">{{z.efectivo}}</span></div>
+<div style="display: flex; gap: 8px; font-weight: 600"><span style="flex: 1">Tiene que haber</span><span style="width: 120px; text-align: right">{{z.esperado}}</span></div>
+<div style="border-top: 1px dashed #12161C; margin: 8px 0"></div>
+<div style="display: flex; gap: 8px"><span style="flex: 1">Ventas anuladas</span><span style="width: 36px; text-align: right">{{z.anuladas}}</span><span style="width: 104px; text-align: right">{{z.anuladoM}}</span></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="contado" style="font-size: 17px; font-weight: 600">Efectivo contado</label>
+<input id="contado" type="number" value="{{contado}}" onChange="{{setContado}}" placeholder="0" style="height: 60px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 16px; font-family: inherit; font-size: 22px; font-weight: 600">
+<sc-if value="{{hayContado}}" hint-placeholder-val="{{false}}">
+<div style="font-size: 18px; font-weight: 700; color: {{difColor}}">{{difTxt}}</div>
+</sc-if>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{noImpreso}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{imprimirCierre}}" style="width: 100%; height: 68px; border: 2px solid #12161C; border-radius: 14px; background: #FFFFFF; color: #12161C; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; cursor: pointer">Imprimir cierre</button>
+</sc-if>
+<sc-if value="{{impreso}}" hint-placeholder-val="{{false}}">
+<div style="height: 68px; display: flex; align-items: center; justify-content: center; border-radius: 14px; background: #DDE1D7; font-size: 18px; font-weight: 600">Cierre impreso.</div>
+</sc-if>
+<button type="button" onClick="{{cerrar}}" style="height: 68px; border: 0; border-radius: 14px; background: #12161C; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; text-transform: uppercase; cursor: pointer">Cerrar caja</button>
+<div style="font-size: 15px; color: #4A5560; text-align: center">El cierre se envía solo cuando haya señal.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{conTabs}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 64px; box-sizing: border-box; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 2px solid #12161C; background: #FFFFFF">
+<button type="button" onClick="{{irVender}}" style="border: 0; background: {{tv.bg}}; color: {{tv.fg}}; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; text-transform: uppercase; cursor: pointer">Vender</button>
+<button type="button" onClick="{{irVentas}}" style="border: 0; background: {{tl.bg}}; color: {{tl.fg}}; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; text-transform: uppercase; cursor: pointer">Ventas</button>
+<button type="button" onClick="{{irCierre}}" style="border: 0; background: {{tc.bg}}; color: {{tc.fg}}; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; text-transform: uppercase; cursor: pointer">Cierre</button>
+</div>
+</sc-if>
+
+<sc-if value="{{sheet.abierto}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(18, 22, 28, 0.6)">
+<div style="display: flex; flex-direction: column; gap: 14px; max-height: 800px; box-sizing: border-box; padding: 20px 16px 16px; border-radius: 22px 22px 0 0; background: #FFFFFF">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="17" fill="#1C6B43"></circle><path d="M10 18.5l5.5 5.5L26 13" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="display: flex; flex-direction: column">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; text-transform: uppercase">{{sheet.titulo}}</div>
+<div style="font-size: 15px; color: #4A5560">{{sheet.medio}}</div>
+</div>
+</div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 44px; line-height: 1">{{sheet.total}}</div>
+</div>
+
+<sc-if value="{{sheet.hayTickets}}" hint-placeholder-val="{{true}}">
+<div style="min-height: 0">
+<div style="padding-bottom: 8px; font-size: 15px; font-weight: 600; color: #4A5560">{{sheet.ticketsTxt}}</div>
+<div style="max-height: 300px; overflow-y: auto; padding: 14px 12px 4px; border-radius: 12px; background: #DDE1D7">
+<sc-for list="{{sheet.tickets}}" as="t" hint-placeholder-count="2">
+<div style="padding-bottom: 10px">
+<div style="width: 232px; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 14px 12px 12px; background: #FFFFFF; border-bottom: 2px dashed #8A938A; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.4; text-align: center">
+<div style="font-weight: 600">CLUB DEPORTIVO MITRE</div>
+<div>{{t.partido}}</div>
+<div style="margin-top: 6px; font-weight: 600; font-size: 19px">{{t.tipo}}</div>
+<sc-if value="{{t.hayDetalle}}" hint-placeholder-val="{{true}}">
+<div style="font-weight: 600; font-size: 17px">{{t.detalle}}</div>
+</sc-if>
+<sc-if value="{{t.hayCuerpo}}" hint-placeholder-val="{{false}}">
+<div style="align-self: stretch; margin: 6px 0 4px; padding: 4px 0; border-top: 1px dashed #12161C; border-bottom: 1px dashed #12161C; text-align: left; white-space: pre; overflow: hidden">{{t.cuerpo}}</div>
+</sc-if>
+<div style="font-size: 17px; font-weight: 600">{{t.precio}}</div>
+<div style="margin-top: 6px">{{t.fecha}} {{t.hora}}</div>
+<div>N° {{t.num}} · {{t.medio}}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{sheet.hayNotas}}" hint-placeholder-val="{{false}}">
+<div>
+<sc-for list="{{sheet.notas}}" as="n" hint-placeholder-count="1">
+<div style="padding-bottom: 6px">
+<div style="padding: 10px 14px; border-radius: 10px; background: #FBE9C4; font-size: 17px; font-weight: 600">{{n.t}}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{sheet.esTransf}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="pagador" style="font-size: 16px; font-weight: 600">¿Quién transfirió?</label>
+<input id="pagador" type="text" value="{{sheet.pagador}}" onChange="{{sheet.setPagador}}" placeholder="Nombre (opcional)" autocomplete="off" style="height: 58px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: inherit; font-size: 21px; font-weight: 600">
+</div>
+</sc-if>
+
+<sc-if value="{{sheet.esEfectivo}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 15px; font-weight: 600; color: #4A5560">¿Con cuánto paga?</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{sheet.chips}}" as="b" hint-placeholder-count="3">
+<button type="button" onClick="{{b.pick}}" aria-pressed="{{b.sel}}" style="height: 52px; border: 2px solid #12161C; border-radius: 12px; background: {{b.bg}}; color: {{b.fg}}; font-family: inherit; font-size: 18px; font-weight: 700; cursor: pointer">{{b.txt}}</button>
+</sc-for>
+</div>
+<sc-if value="{{sheet.hayVuelto}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: baseline; justify-content: space-between; padding: 8px 14px; border-radius: 12px; background: #DDE1D7">
+<span style="font-size: 18px; font-weight: 600">Vuelto</span>
+<span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 38px; line-height: 1">{{sheet.vuelto}}</span>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<button type="button" onClick="{{siguiente}}" style="height: 76px; flex-shrink: 0; border: 0; border-radius: 16px; background: #12161C; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; text-transform: uppercase; cursor: pointer">Siguiente</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{aliasAbierto}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 6; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(18, 22, 28, 0.6)">
+<div style="display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; padding: 22px 16px 16px; border-radius: 22px 22px 0 0; background: #FFFFFF">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; text-transform: uppercase">Datos para transferir</div>
+<sc-if value="{{hayTotal}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: baseline; justify-content: space-between; padding: 8px 14px; border-radius: 12px; background: #DDE1D7">
+<span style="font-size: 18px; font-weight: 600">A transferir</span>
+<span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 40px; line-height: 1">{{totalTxt}}</span>
+</div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 15px; font-weight: 600; color: #4A5560">Alias</div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 44px; line-height: 1; overflow-wrap: anywhere">{{transf.alias}}</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 15px; font-weight: 600; color: #4A5560">A nombre de</div>
+<div style="font-size: 22px; font-weight: 600">{{transf.titular}}</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 15px; font-weight: 600; color: #4A5560">Banco o billetera</div>
+<div style="font-size: 22px; font-weight: 600">{{transf.banco}}</div>
+</div>
+<button type="button" onClick="{{cerrarAlias}}" style="height: 72px; border: 0; border-radius: 16px; background: #12161C; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; text-transform: uppercase; cursor: pointer">Cerrar</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ed.abierto}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 6; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(18, 22, 28, 0.6)">
+<div style="display: flex; flex-direction: column; gap: 14px; max-height: 810px; overflow-y: auto; box-sizing: border-box; padding: 22px 16px 16px; border-radius: 22px 22px 0 0; background: #FFFFFF">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; text-transform: uppercase">{{ed.encabezado}}</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="ed-nombre" style="font-size: 16px; font-weight: 600">Nombre del botón</label>
+<input id="ed-nombre" type="text" value="{{ed.nombre}}" onChange="{{ed.setNombre}}" autocomplete="off" style="height: 54px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: inherit; font-size: 20px; font-weight: 600">
+</div>
+
+<sc-if value="{{ed.conPrecio}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="ed-precio" style="font-size: 16px; font-weight: 600">Precio</label>
+<input id="ed-precio" type="number" value="{{ed.precio}}" onChange="{{ed.setPrecio}}" style="height: 54px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: inherit; font-size: 20px; font-weight: 600">
+</div>
+</sc-if>
+
+<sc-if value="{{ed.conSocio}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="ed-socio" style="font-size: 16px; font-weight: 600">Precio para socios</label>
+<input id="ed-socio" type="number" value="{{ed.socio}}" onChange="{{ed.setSocio}}" style="height: 54px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: inherit; font-size: 20px; font-weight: 600">
+</div>
+</sc-if>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 16px; font-weight: 600">Ticket</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" onClick="{{ed.setPersona}}" aria-pressed="{{ed.esPersona}}" style="height: 64px; padding: 0 6px; border: 2px solid #12161C; border-radius: 12px; background: {{ed.tp.bg}}; color: {{ed.tp.fg}}; font-family: inherit; font-size: 16px; font-weight: 700; line-height: 1.15; cursor: pointer">Uno por persona</button>
+<button type="button" onClick="{{ed.setVenta}}" aria-pressed="{{ed.esVenta}}" style="height: 64px; padding: 0 6px; border: 2px solid #12161C; border-radius: 12px; background: {{ed.tv.bg}}; color: {{ed.tv.fg}}; font-family: inherit; font-size: 16px; font-weight: 700; line-height: 1.15; cursor: pointer">Uno por venta</button>
+<button type="button" onClick="{{ed.setNo}}" aria-pressed="{{ed.esNo}}" style="height: 64px; padding: 0 6px; border: 2px solid #12161C; border-radius: 12px; background: {{ed.tn.bg}}; color: {{ed.tn.fg}}; font-family: inherit; font-size: 16px; font-weight: 700; line-height: 1.15; cursor: pointer">No imprime</button>
+</div>
+<div style="font-size: 15px; color: #4A5560">{{ed.ayudaTicket}}</div>
+</div>
+
+<sc-if value="{{ed.imprime}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="ed-titulo" style="font-size: 16px; font-weight: 600">Título que sale en el ticket</label>
+<input id="ed-titulo" type="text" value="{{ed.titulo}}" onChange="{{ed.setTitulo}}" autocomplete="off" style="height: 54px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 12px; background: #FFFFFF; color: #12161C; padding: 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600">
+</div>
+</sc-if>
+
+<button type="button" onClick="{{ed.toggleVisible}}" aria-pressed="{{ed.visible}}" style="min-height: 60px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 14px; border: 0; border-radius: 12px; background: #EEF0EA; color: #12161C; font-family: inherit; text-align: left; cursor: pointer">
+<span style="font-size: 18px; font-weight: 600">Se muestra para vender</span>
+<span style="flex-shrink: 0; min-width: 52px; padding: 6px 12px; box-sizing: border-box; border: 2px solid #12161C; border-radius: 10px; background: {{ed.visPill.bg}}; color: {{ed.visPill.fg}}; font-size: 16px; font-weight: 700; text-align: center">{{ed.visTxt}}</span>
+</button>
+
+<button type="button" onClick="{{ed.cerrar}}" style="height: 68px; flex-shrink: 0; border: 0; border-radius: 16px; background: #12161C; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; text-transform: uppercase; cursor: pointer">Listo</button>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"inicio":{"editor":null,"default":"abrir"},"demo":{"editor":null,"default":""},"alto":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  money(n) {
+    const v = Math.round(n);
+    const sign = v < 0 ? '-' : '';
+    return sign + '$ ' + String(Math.abs(v)).replace(/\B(?=(\d\d\d)+(?!\d))/g, '.');
+  }
+
+  itemsBase() {
+    return [
+      { id: 'hombre', nombre: 'Hombre', grupo: 'entrada', precio: 10000, socio: 10000, visible: true, ticket: 'venta', titulo: 'ENTRADA GENERAL', entrega: false },
+      { id: 'mujer', nombre: 'Mujer', grupo: 'entrada', precio: 7000, socio: 7000, visible: true, ticket: 'venta', titulo: 'ENTRADA GENERAL', entrega: false },
+      { id: 'tribuna', nombre: 'Tribuna', grupo: 'extra', precio: 2000, socio: 2000, visible: true, ticket: 'persona', titulo: 'TRIBUNA', entrega: false },
+      { id: 'sorteo', nombre: 'Sorteo', grupo: 'extra', precio: 2000, socio: 2000, visible: true, ticket: 'no', titulo: 'SORTEO', entrega: true },
+      { id: 'jugador', nombre: 'Jugador', grupo: 'gratis', precio: 0, socio: 0, visible: true, ticket: 'no', titulo: 'SIN CARGO', entrega: false },
+      { id: 'menor', nombre: 'Menor', grupo: 'gratis', precio: 0, socio: 0, visible: true, ticket: 'no', titulo: 'SIN CARGO', entrega: false }
+    ];
+  }
+
+  varios(nombre) {
+    const last = nombre.slice(-1).toLowerCase();
+    if (!last || last === 's') return nombre;
+    return nombre + ('aeiouáéíóú'.indexOf(last) >= 0 ? 's' : 'es');
+  }
+
+  plural(q, nombre) { return q + ' ' + (q === 1 ? nombre : this.varios(nombre)); }
+
+  dos(n) { return (n < 10 ? '0' : '') + n; }
+
+  hora() {
+    const d = new Date();
+    return this.dos(d.getHours()) + ':' + this.dos(d.getMinutes());
+  }
+
+  fecha() {
+    const d = new Date();
+    return this.dos(d.getDate()) + '/' + this.dos(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+
+  unitario(it, socio) { return socio && it.grupo === 'entrada' ? it.socio : it.precio; }
+
+  armar(items, cart, medio, socio, seq, id, hora) {
+    const lines = [];
+    const sueltos = [];
+    const juntos = [];
+    let total = 0;
+    items.forEach((it) => {
+      const q = cart[it.id] || 0;
+      if (!q) return;
+      const unit = this.unitario(it, socio);
+      const up = it.nombre.toUpperCase();
+      const sello = socio && it.grupo === 'entrada' ? ' · SOCIO' : '';
+      total += unit * q;
+      lines.push({ id: it.id, nombre: it.nombre, grupo: it.grupo, ticket: it.ticket, entrega: it.entrega, q: q, sub: unit * q });
+      if (it.ticket === 'persona') {
+        for (let i = 0; i < q; i++) {
+          sueltos.push({ tipo: it.titulo, detalle: (up === it.titulo ? '' : up) + sello, cuerpo: '', precio: unit ? this.money(unit) : '' });
+        }
+      }
+      if (it.ticket === 'venta') juntos.push({ titulo: it.titulo + sello, txt: q + ' ' + up, sub: unit * q });
+    });
+    const tickets = [];
+    if (juntos.length) {
+      let suma = 0;
+      const mismo = juntos.every((j) => j.titulo === juntos[0].titulo);
+      const cuerpo = juntos.map((j) => {
+        suma += j.sub;
+        return j.txt.slice(0, 14).padEnd(15) + (j.sub ? this.money(j.sub) : 's/cargo').padStart(11);
+      }).join('\n');
+      tickets.push({ tipo: mismo ? juntos[0].titulo : 'COMPROBANTE', detalle: '', cuerpo: cuerpo, precio: suma ? 'TOTAL ' + this.money(suma) : '' });
+    }
+    let n = seq;
+    sueltos.forEach((t) => tickets.push(t));
+    tickets.forEach((t) => {
+      n += 1;
+      t.num = ('0000' + n).slice(-4);
+      t.hayDetalle = t.detalle !== '';
+      t.hayCuerpo = t.cuerpo !== '';
+    });
+    return { id: id, hora: hora, lines: lines, total: total, medio: total ? medio : 'Sin cargo', pagador: '', anulada: false, tickets: tickets, seqFin: n };
+  }
+
+  base() {
+    const p = this.props;
+    const demo = p.demo ?? '';
+    const d = {
+      screen: p.inicio ?? 'abrir', local: true, rival: '', fondo: '', socio: false, socios: false,
+      items: this.itemsBase(), nuevos: 0, editId: '', alias: false,
+      transf: { alias: '[ALIAS DEL CLUB]', titular: '[TITULAR DE LA CUENTA]', banco: '[BANCO]' },
+      cart: { }, ventas: [], seq: 0, sheet: 0, pagaCon: 0, confirmId: 0, contado: '', impreso: false
+    };
+    if (demo) {
+      const carritos = [
+        [{ hombre: 2, mujer: 1, tribuna: 2 }, 'Efectivo', '15:41'],
+        [{ mujer: 1, menor: 1 }, 'Transferencia', '15:43'],
+        [{ jugador: 1 }, 'Efectivo', '15:44'],
+        [{ hombre: 1, sorteo: 3 }, 'Efectivo', '15:47']
+      ];
+      let seq = 0;
+      carritos.forEach((c, i) => {
+        const v = this.armar(d.items, c[0], c[1], false, seq, i + 1, c[2]);
+        seq = v.seqFin;
+        d.ventas.push(v);
+      });
+      d.seq = seq;
+      d.ventas[1].pagador = '[NOMBRE]';
+      d.rival = '[RIVAL]';
+      d.fondo = '20000';
+    }
+    if (demo === 'carrito') d.cart = { hombre: 2, mujer: 1, tribuna: 1 };
+    if (demo === 'cobrado') { d.sheet = 1; d.pagaCon = 50000; }
+    if (demo === 'editar') d.editId = 'tribuna';
+    return d;
+  }
+
+  st() { return Object.assign(this.base(), this.state || { }); }
+
+  renderVals() {
+    const p = this.props;
+    const s = this.st();
+    const set = (patch) => this.setState(patch);
+    const sociosOn = s.socios;
+    const esSocio = sociosOn && s.socio;
+    const local = s.local;
+    const INK = '#12161C';
+    const WHITE = '#FFFFFF';
+    const on = { bg: INK, fg: WHITE };
+    const off = { bg: WHITE, fg: INK };
+    const paleta = [
+      { bg: '#1E4E8C', fg: WHITE },
+      { bg: '#F2B33D', fg: INK },
+      { bg: '#0E6E6E', fg: WHITE },
+      { bg: '#7A2E5D', fg: WHITE }
+    ];
+    const modoTxt = { persona: 'Un ticket por persona', venta: 'Un ticket por venta', no: 'Sin ticket' };
+
+    const enVenta = s.items.filter((it) => it.visible && (local || it.grupo !== 'extra'));
+    const cuantasPrincipales = enVenta.filter((it) => it.grupo === 'entrada').length;
+    let total = 0;
+    let cantidad = 0;
+    const partes = [];
+    const grupos = { entrada: [], extra: [], gratis: [] };
+    enVenta.forEach((it) => {
+      const q = s.cart[it.id] || 0;
+      const unit = this.unitario(it, esSocio);
+      const color = paleta[grupos.entrada.length % paleta.length];
+      grupos[it.grupo].push({
+        nombre: it.nombre,
+        precioTxt: this.money(unit),
+        qty: q,
+        has: q > 0,
+        alto: cuantasPrincipales > 2 ? '124px' : '172px',
+        bg: color.bg,
+        fg: color.fg,
+        badgeBg: color.fg,
+        badgeFg: color.fg === WHITE ? INK : WHITE,
+        quitar: 'Quitar 1 ' + it.nombre,
+        add: () => {
+          const n = Object.assign({ }, this.st().cart);
+          n[it.id] = (n[it.id] || 0) + 1;
+          set({ cart: n });
+        },
+        sub: () => {
+          const n = Object.assign({ }, this.st().cart);
+          n[it.id] = Math.max(0, (n[it.id] || 0) - 1);
+          set({ cart: n });
+        }
+      });
+      if (q) {
+        total += q * unit;
+        cantidad += q;
+        partes.push(this.plural(q, it.nombre));
+      }
+    });
+
+    const cobrar = (medio) => () => {
+      const cur = this.st();
+      const v = this.armar(cur.items, cur.cart, medio, cur.socios && cur.socio, cur.seq, cur.ventas.length + 1, this.hora());
+      if (!v.lines.length) return;
+      set({ ventas: cur.ventas.concat([v]), seq: v.seqFin, cart: { }, socio: false, sheet: v.id, pagaCon: 0, confirmId: 0, alias: false });
+    };
+
+    const acum = { };
+    let ef = 0;
+    let tr = 0;
+    let anuladas = 0;
+    let anuladoM = 0;
+    const transfs = [];
+    s.ventas.forEach((v) => {
+      if (v.anulada) { anuladas += 1; anuladoM += v.total; return; }
+      if (v.medio === 'Transferencia') transfs.push({ txt: v.hora + ' ' + (v.pagador || 'Sin nombre'), m: this.money(v.total) });
+      v.lines.forEach((l) => {
+        const a = acum[l.id] || { q: 0, m: 0 };
+        a.q += l.q;
+        a.m += l.sub;
+        acum[l.id] = a;
+      });
+      if (v.medio === 'Efectivo') ef += v.total;
+      if (v.medio === 'Transferencia') tr += v.total;
+    });
+    const filas = { entrada: [], extra: [], gratis: [] };
+    const sumas = { entrada: { q: 0, m: 0 }, extra: { q: 0, m: 0 }, gratis: { q: 0, m: 0 } };
+    s.items.forEach((it) => {
+      const a = acum[it.id];
+      if (!a && !it.visible) return;
+      const q = a ? a.q : 0;
+      const m = a ? a.m : 0;
+      sumas[it.grupo].q += q;
+      sumas[it.grupo].m += m;
+      filas[it.grupo].push({ nombre: this.varios(it.nombre), q: q, m: this.money(m) });
+    });
+    const fondo = Number(s.fondo) || 0;
+    const esperado = fondo + ef;
+    const z = {
+      entradas: filas.entrada,
+      entradasQ: sumas.entrada.q,
+      entradasM: this.money(sumas.entrada.m),
+      extras: filas.extra,
+      hayExtras: local && filas.extra.length > 0,
+      gratis: filas.gratis,
+      personas: sumas.entrada.q + sumas.gratis.q,
+      efectivo: this.money(ef),
+      transferencia: this.money(tr),
+      transfs: transfs,
+      total: this.money(ef + tr),
+      fondo: this.money(fondo),
+      esperado: this.money(esperado),
+      anuladas: anuladas,
+      anuladoM: this.money(anuladoM)
+    };
+
+    const hayContado = s.contado !== '';
+    const dif = (Number(s.contado) || 0) - esperado;
+    const difTxt = dif === 0 ? 'Coincide con lo esperado.' : (dif > 0 ? 'Sobran ' + this.money(dif) + '.' : 'Faltan ' + this.money(-dif) + '.');
+
+    const partidoTxt = s.rival ? 'vs. ' + s.rival : 'Partido de hoy';
+    const fechaTxt = this.fecha();
+
+    const ventasView = s.ventas.slice().reverse().map((v) => {
+      const pide = s.confirmId === v.id;
+      return {
+        hora: v.hora,
+        resumen: v.lines.map((l) => this.plural(l.q, l.nombre)).join(' · '),
+        medio: v.medio + (v.pagador ? ' de ' + v.pagador : ''),
+        total: this.money(v.total),
+        anulada: v.anulada,
+        activa: !v.anulada,
+        bg: v.anulada ? '#DDE1D7' : WHITE,
+        deco: v.anulada ? 'line-through' : 'none',
+        btn: pide ? '¿Anular?' : 'Anular',
+        btnBg: pide ? '#A32A1E' : WHITE,
+        btnFg: pide ? WHITE : '#A32A1E',
+        anular: () => {
+          const cur = this.st();
+          if (cur.confirmId !== v.id) { set({ confirmId: v.id }); return; }
+          set({ confirmId: 0, ventas: cur.ventas.map((x) => (x.id === v.id ? Object.assign({ }, x, { anulada: true }) : x)) });
+        }
+      };
+    });
+
+    let sheet = { abierto: false, esTransf: false, pagador: '', titulo: '', total: '', medio: '', tickets: [], hayTickets: false, ticketsTxt: '', notas: [], hayNotas: false, esEfectivo: false, chips: [], hayVuelto: false, vuelto: '' };
+    const sv = s.sheet ? s.ventas.find((v) => v.id === s.sheet) : null;
+    if (sv) {
+      const notas = [];
+      const sinTicket = [];
+      sv.lines.forEach((l) => {
+        if (l.ticket !== 'no') return;
+        if (l.entrega) notas.push('Entregá ' + l.q + (l.q === 1 ? ' número' : ' números') + ' del sorteo.');
+        else sinTicket.push(this.plural(l.q, l.nombre));
+      });
+      if (sinTicket.length) notas.push('Anotado sin ticket: ' + sinTicket.join(' · ') + '.');
+      if (sv.medio === 'Transferencia') notas.push('Pedí ver el comprobante de la transferencia.');
+      const billetes = [];
+      [10000, 20000, 50000, 100000].forEach((b) => {
+        const arriba = Math.ceil(sv.total / b) * b;
+        if (arriba > sv.total && billetes.indexOf(arriba) < 0) billetes.push(arriba);
+      });
+      const esEfectivo = sv.medio === 'Efectivo' && sv.total > 0;
+      sheet = {
+        abierto: true,
+        titulo: sv.total ? 'Cobrado' : 'Anotado',
+        total: this.money(sv.total),
+        medio: sv.medio,
+        tickets: sv.tickets.map((t) => Object.assign({ partido: partidoTxt, fecha: fechaTxt, hora: sv.hora, medio: sv.medio }, t)),
+        hayTickets: sv.tickets.length > 0,
+        ticketsTxt: sv.tickets.length === 1 ? 'Se imprime 1 ticket' : 'Se imprimen ' + sv.tickets.length + ' tickets',
+        notas: notas.map((t) => ({ t: t })),
+        hayNotas: notas.length > 0,
+        esTransf: sv.medio === 'Transferencia',
+        pagador: sv.pagador,
+        setPagador: (e) => {
+          const nombre = e.target.value;
+          set({ ventas: this.st().ventas.map((x) => (x.id === sv.id ? Object.assign({ }, x, { pagador: nombre }) : x)) });
+        },
+        esEfectivo: esEfectivo,
+        chips: billetes.slice(0, 3).map((b) => {
+          const sel = s.pagaCon === b;
+          return { txt: this.money(b), sel: sel, bg: sel ? INK : WHITE, fg: sel ? WHITE : INK, pick: () => set({ pagaCon: b }) };
+        }),
+        hayVuelto: esEfectivo && s.pagaCon > sv.total,
+        vuelto: this.money(s.pagaCon - sv.total)
+      };
+    }
+
+    const cambiar = (id, patch) => set({ items: this.st().items.map((x) => (x.id === id ? Object.assign({ }, x, patch) : x)) });
+    const cfgRows = [];
+    const secciones = [
+      { g: 'entrada', txt: 'Entradas', mas: 'Agregar entrada', nombre: 'Nueva', ticket: 'venta', titulo: 'ENTRADA GENERAL' },
+      { g: 'extra', txt: 'Solo cuando se juega de local', mas: 'Agregar otro', nombre: 'Nuevo', ticket: 'persona', titulo: 'EXTRA' },
+      { g: 'gratis', txt: 'No pagan entrada', mas: 'Agregar otro', nombre: 'Nuevo', ticket: 'no', titulo: 'SIN CARGO' }
+    ];
+    secciones.forEach((sec) => {
+      cfgRows.push({ esTitulo: true, esItem: false, esAgregar: false, txt: sec.txt });
+      s.items.filter((it) => it.grupo === sec.g).forEach((it) => {
+        const paga = it.grupo === 'gratis' ? 'No paga' : this.money(it.precio);
+        cfgRows.push({
+          esTitulo: false, esItem: true, esAgregar: false,
+          nombre: it.nombre,
+          detalle: paga + ' · ' + modoTxt[it.ticket],
+          accion: it.visible ? 'Cambiar' : 'Oculto',
+          bg: it.visible ? WHITE : '#D3D9CC',
+          editar: () => set({ editId: it.id })
+        });
+      });
+      cfgRows.push({
+        esTitulo: false, esItem: false, esAgregar: true, txt: sec.mas,
+        agregar: () => {
+          const cur = this.st();
+          const id = 'nuevo' + (cur.nuevos + 1);
+          const nuevo = { id: id, nombre: sec.nombre, grupo: sec.g, precio: 0, socio: 0, visible: true, ticket: sec.ticket, titulo: sec.titulo, entrega: false };
+          set({ items: cur.items.concat([nuevo]), nuevos: cur.nuevos + 1, editId: id });
+        }
+      });
+    });
+
+    let ed = { abierto: false, encabezado: '', nombre: '', precio: 0, socio: 0, titulo: '', conPrecio: false, conSocio: false, imprime: false, esPersona: false, esVenta: false, esNo: false, tp: off, tv: off, tn: off, ayudaTicket: '', visible: true, visTxt: '', visPill: off };
+    const ei = s.editId ? s.items.find((it) => it.id === s.editId) : null;
+    if (ei) {
+      const ayudas = {
+        persona: 'Sale un ticket por cada uno. Sirve cuando alguien lo controla.',
+        venta: 'Sale un solo ticket con todo lo de la venta.',
+        no: 'Se cuenta en el cierre y no gasta papel.'
+      };
+      ed = {
+        abierto: true,
+        encabezado: ei.nombre || 'Botón',
+        nombre: ei.nombre,
+        precio: ei.precio,
+        socio: ei.socio,
+        titulo: ei.titulo,
+        conPrecio: ei.grupo !== 'gratis',
+        conSocio: sociosOn && ei.grupo === 'entrada',
+        imprime: ei.ticket !== 'no',
+        esPersona: ei.ticket === 'persona',
+        esVenta: ei.ticket === 'venta',
+        esNo: ei.ticket === 'no',
+        tp: ei.ticket === 'persona' ? on : off,
+        tv: ei.ticket === 'venta' ? on : off,
+        tn: ei.ticket === 'no' ? on : off,
+        ayudaTicket: ayudas[ei.ticket],
+        visible: ei.visible,
+        visTxt: ei.visible ? 'Sí' : 'No',
+        visPill: ei.visible ? on : off,
+        setNombre: (e) => cambiar(ei.id, { nombre: e.target.value }),
+        setPrecio: (e) => cambiar(ei.id, { precio: Number(e.target.value) || 0 }),
+        setSocio: (e) => cambiar(ei.id, { socio: Number(e.target.value) || 0 }),
+        setTitulo: (e) => cambiar(ei.id, { titulo: e.target.value.toUpperCase() }),
+        setPersona: () => cambiar(ei.id, { ticket: 'persona' }),
+        setVenta: () => cambiar(ei.id, { ticket: 'venta' }),
+        setNo: () => cambiar(ei.id, { ticket: 'no' }),
+        toggleVisible: () => cambiar(ei.id, { visible: !ei.visible }),
+        cerrar: () => set({ editId: '' })
+      };
+    }
+
+    const setTransf = (campo) => (e) => {
+      const t = Object.assign({ }, this.st().transf);
+      t[campo] = e.target.value;
+      set({ transf: t });
+    };
+
+    const scr = s.screen;
+    const alto = p.alto ?? 844;
+    return {
+      altoPx: alto + 'px',
+      esAbrir: scr === 'abrir',
+      esConfig: scr === 'config',
+      esVender: scr === 'vender',
+      esVentas: scr === 'ventas',
+      esCierre: scr === 'cierre',
+      conTabs: scr === 'vender' || scr === 'ventas' || scr === 'cierre',
+      tv: scr === 'vender' ? on : off,
+      tl: scr === 'ventas' ? on : off,
+      tc: scr === 'cierre' ? on : off,
+      irVender: () => set({ screen: 'vender', confirmId: 0 }),
+      irVentas: () => set({ screen: 'ventas' }),
+      irCierre: () => set({ screen: 'cierre', confirmId: 0 }),
+      irConfig: () => set({ screen: 'config' }),
+      irAbrir: () => set({ screen: 'abrir', editId: '' }),
+
+      esLocal: local,
+      esVisitante: !local,
+      loc: local ? on : off,
+      vis: local ? off : on,
+      setLocal: () => set({ local: true }),
+      setVisitante: () => set({ local: false, cart: { } }),
+      ayudaCondicion: local ? 'Se vende todo lo que está configurado.' : 'Solo se venden entradas.',
+      condicionTxt: local ? 'Local' : 'Visitante',
+      rival: s.rival,
+      setRival: (e) => set({ rival: e.target.value }),
+      fondo: s.fondo,
+      setFondo: (e) => set({ fondo: e.target.value }),
+      abrir: () => set({ screen: 'vender' }),
+      preciosHoy: enVenta.filter((it) => it.grupo !== 'gratis').map((it) => ({ nombre: it.nombre, precio: this.money(it.precio) })),
+
+      cfgRows: cfgRows,
+      ed: ed,
+      sociosOn: sociosOn,
+      sociosTxt: sociosOn ? 'Sí' : 'No',
+      sociosPill: sociosOn ? on : off,
+      toggleSocios: () => set({ socios: !this.st().socios, socio: false }),
+      transf: s.transf,
+      setAlias: setTransf('alias'),
+      setTitular: setTransf('titular'),
+      setBanco: setTransf('banco'),
+
+      partidoTxt: partidoTxt,
+      fechaTxt: fechaTxt,
+      esSocio: esSocio,
+      esNoSocio: !esSocio,
+      soc: esSocio ? on : off,
+      nos: esSocio ? off : on,
+      setSocio: () => set({ socio: true }),
+      setNoSocio: () => set({ socio: false }),
+
+      principales: grupos.entrada,
+      extras: grupos.extra,
+      hayExtras: grupos.extra.length > 0,
+      gratis: grupos.gratis,
+      hayGratis: grupos.gratis.length > 0,
+      resumen: cantidad ? partes.join(' · ') : 'Tocá lo que te piden',
+      totalTxt: this.money(total),
+      hayItems: cantidad > 0,
+      hayTotal: total > 0,
+      modoPago: !(cantidad > 0 && total === 0),
+      modoGratis: cantidad > 0 && total === 0,
+      payOp: cantidad > 0 ? 1 : 0.4,
+      clear: () => set({ cart: { } }),
+      cobrarEfectivo: cobrar('Efectivo'),
+      cobrarTransferencia: cobrar('Transferencia'),
+      aliasAbierto: s.alias && scr === 'vender',
+      verAlias: () => set({ alias: true }),
+      cerrarAlias: () => set({ alias: false }),
+
+      sheet: sheet,
+      siguiente: () => set({ sheet: 0, pagaCon: 0 }),
+
+      ventasView: ventasView,
+      sinVentas: s.ventas.length === 0,
+      ventasTxt: this.plural(s.ventas.length - anuladas, 'venta'),
+
+      z: z,
+      contado: s.contado,
+      setContado: (e) => set({ contado: e.target.value, impreso: false }),
+      hayContado: hayContado,
+      difTxt: difTxt,
+      difColor: dif === 0 ? '#1C6B43' : '#A32A1E',
+      impreso: s.impreso,
+      noImpreso: !s.impreso,
+      imprimirCierre: () => set({ impreso: true }),
+      cerrar: () => set({ screen: 'abrir', ventas: [], seq: 0, cart: { }, rival: '', fondo: '', contado: '', sheet: 0, pagaCon: 0, impreso: false, socio: false, confirmId: 0, alias: false })
+    };
+  }
+}
+</script>
+</body>
+</html>
