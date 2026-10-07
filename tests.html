@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas — Entradas en la cancha</title>
+<style>
+body { margin: 0; padding: 16px; background: #EEF0EA; color: #12161C; font-family: system-ui, sans-serif; font-size: 15px; }
+h1 { margin: 0 0 4px; font-size: 22px; }
+#resumen { margin-bottom: 12px; font-weight: 700; font-size: 18px; }
+.caso { margin-bottom: 10px; padding: 10px 12px; border-radius: 10px; background: #FFFFFF; }
+.caso h2 { margin: 0 0 6px; font-size: 16px; }
+.ok, .falla { padding: 2px 0; }
+.ok::before { content: '✔ '; color: #1C6B43; font-weight: 700; }
+.falla { color: #A32A1E; font-weight: 600; }
+.falla::before { content: '✘ '; }
+.falla pre { margin: 4px 0 0 18px; font-size: 12px; white-space: pre-wrap; color: #12161C; font-weight: 400; }
+</style>
+</head>
+<body>
+<h1>Pruebas de las reglas</h1>
+<div id="resumen">Cargando…</div>
+<div id="casos"></div>
+
+<script>
+// Carga las reglas desde index.html: se prueban las mismas funciones que usa la app.
+(async () => {
+  const html = await (await fetch('index.html', { cache: 'no-store' })).text();
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const s = document.createElement('script');
+  s.textContent = doc.getElementById('reglas').textContent;
+  document.head.appendChild(s);
+  correr();
+})().catch((e) => { document.getElementById('resumen').textContent = 'No se pudieron cargar las reglas: ' + e.message; });
+
+let okTotal = 0;
+let fallaTotal = 0;
+let actual = null;
+
+function caso(titulo, fn) {
+  actual = document.createElement('div');
+  actual.className = 'caso';
+  actual.innerHTML = '<h2></h2>';
+  actual.firstChild.textContent = titulo;
+  document.getElementById('casos').appendChild(actual);
+  try { fn(); } catch (e) { marcar(false, 'Error: ' + e.message, e.stack); }
+}
+
+function marcar(bien, texto, detalle) {
+  const d = document.createElement('div');
+  d.className = bien ? 'ok' : 'falla';
+  d.textContent = texto;
+  if (!bien && detalle) { const p = document.createElement('pre'); p.textContent = detalle; d.appendChild(p); }
+  actual.appendChild(d);
+  if (bien) okTotal++; else fallaTotal++;
+}
+
+function igual(obtenido, esperado, texto) {
+  const a = JSON.stringify(obtenido);
+  const b = JSON.stringify(esperado);
+  marcar(a === b, texto, 'esperado: ' + b + '\nobtenido: ' + a);
+}
+
+// Hora local fija para que la prueba no dependa del huso horario.
+const hora = (h, m) => new Date(2026, 9, 7, h, m).toISOString();
+
+function almacenDeMentira() {
+  const datos = {};
+  return {
+    datos,
+    getItem: (k) => (k in datos ? datos[k] : null),
+    setItem: (k, v) => { datos[k] = String(v); }
+  };
+}
+
+// Cobra sobre la caja como lo hará la app: arma, agrega la venta y avanza la numeración.
+function cobrar(caja, carrito, medio, socio, ahora) {
+  const r = armarVenta(caja.botones, carrito, { id: caja.ventas.length + 1, medio, socio, ultimoTicket: caja.ultimoTicket, ahora });
+  caja.ventas.push(r.venta);
+  caja.ultimoTicket = r.ultimoTicket;
+  return r.venta;
+}
+
+function cajaDePrueba(condicion, botones) {
+  return nuevaCaja({ condicion: condicion || 'local', rival: 'Rival', fondo: 20000, botones: botones || botonesDeFabrica(), ahora: hora(15, 30) });
+}
+
+// Filas del cierre como [nombre, cantidad, monto] para comparar fácil.
+const filas = (lista) => lista.map((f) => [f.nombre, f.cantidad, f.monto]);
+
+function correr() {
+  caso('Formatos', () => {
+    igual([plata(10000), plata(0), plata(1234567), plata(-19000)], ['$ 10.000', '$ 0', '$ 1.234.567', '-$ 19.000'], 'plata');
+    igual([cantidadDe(1, 'Hombre'), cantidadDe(2, 'Hombre'), cantidadDe(2, 'Mujer'), cantidadDe(3, 'Jugador'), cantidadDe(2, 'Tribuna'), cantidadDe(2, 'Menor'), enPlural('Pase')],
+      ['1 Hombre', '2 Hombres', '2 Mujeres', '3 Jugadores', '2 Tribunas', '2 Menores', 'Pases'], 'plurales');
+    igual([fechaHoraTxt(hora(15, 41)), numeroTicket(1), numeroTicket(123)], ['07/10/2026 15:41', '0001', '0123'], 'fecha y número de ticket');
+  });
+
+  // Ventas 1 a 4 sobre la misma caja
+  const caja = cajaDePrueba();
+  let v1, v2, v3, v4;
+
+  caso('1. 2 Hombre + 1 Mujer + 2 Tribuna, efectivo', () => {
+    v1 = cobrar(caja, { hombre: 2, mujer: 1, tribuna: 2 }, 'efectivo', false, hora(15, 41));
+    igual(v1.total, 31000, 'total $ 31.000');
+    igual(v1.medio, 'efectivo', 'medio efectivo');
+    igual(v1.tickets.length, 3, '3 tickets');
+    const [t1, t2, t3] = v1.tickets;
+    igual([t1.numero, t1.clase, t1.titulo, t1.cuerpo, t1.total], [1, 'combinado', 'ENTRADA GENERAL',
+      [{ texto: '2 HOMBRE', monto: '$ 20.000' }, { texto: '1 MUJER', monto: '$ 7.000' }], 27000], 'N° 0001 combinado ENTRADA GENERAL, TOTAL $ 27.000');
+    igual([t2.numero, t2.clase, t2.titulo, t2.detalle, t2.total], [2, 'individual', 'TRIBUNA', '', 2000], 'N° 0002 TRIBUNA $ 2.000, sin detalle repetido');
+    igual([t3.numero, t3.titulo, t3.total], [3, 'TRIBUNA', 2000], 'N° 0003 TRIBUNA $ 2.000');
+    igual(sugerenciasDePago(v1.total), [40000, 50000, 100000], 'sugerencias 40.000, 50.000, 100.000');
+    igual(50000 - v1.total, 19000, 'con 50.000, vuelto $ 19.000');
+    igual(sugerenciasDePago(7000), [10000, 20000, 50000], 'con $ 7.000: 10.000, 20.000, 50.000');
+    igual(sugerenciasDePago(20000), [50000, 100000], 'con $ 20.000 justos: solo los mayores, 50.000 y 100.000');
+    igual(resumenLineas(v1.lineas), '2 Hombres · 1 Mujer · 2 Tribunas', 'resumen');
+    igual(avisosDeVenta(v1), [], 'sin avisos');
+  });
+
+  caso('2. 1 Mujer + 1 Menor, transferencia, "Juan"', () => {
+    v2 = cobrar(caja, { mujer: 1, menor: 1 }, 'transferencia', false, hora(15, 43));
+    igual(v2.total, 7000, 'total $ 7.000');
+    igual(v2.tickets.map((t) => t.numero), [4], '1 ticket, N° 0004');
+    igual(v2.tickets[0].cuerpo, [{ texto: '1 MUJER', monto: '$ 7.000' }], 'el menor no figura en el ticket');
+    igual(avisosDeVenta(v2), ['Anotado sin ticket: 1 Menor.', 'Pedí ver el comprobante de la transferencia.'], 'avisos');
+    igual(medioTxt(v2), 'Transferencia', 'sin nombre: "Transferencia"');
+    v2.pagador = 'Juan';
+    igual(medioTxt(v2), 'Transferencia de Juan', 'con nombre: "Transferencia de Juan"');
+  });
+
+  caso('3. 1 Jugador', () => {
+    const c = totalCarrito(caja.botones, { jugador: 1 }, false);
+    igual([c.total, c.cantidad > 0], [0, true], 'total $ 0 con algo cargado (va "Anotar sin cargo")');
+    v3 = cobrar(caja, { jugador: 1 }, 'efectivo', false, hora(15, 44));
+    igual([v3.total, v3.medio, v3.tickets.length], [0, 'sin_cargo', 0], 'medio sin cargo, 0 tickets');
+    igual(medioTxt(v3), 'Sin cargo', 'se lee "Sin cargo"');
+    igual(caja.ultimoTicket, 4, 'no consume números');
+  });
+
+  caso('4. 1 Hombre + 3 Sorteo, efectivo', () => {
+    v4 = cobrar(caja, { hombre: 1, sorteo: 3 }, 'efectivo', false, hora(15, 47));
+    igual(v4.total, 16000, 'total $ 16.000');
+    igual(v4.tickets.map((t) => [t.numero, t.cuerpo, t.total]), [[5, [{ texto: '1 HOMBRE', monto: '$ 10.000' }], 10000]], '1 ticket N° 0005: 1 HOMBRE $ 10.000 / TOTAL $ 10.000');
+    igual(avisosDeVenta(v4), ['Entregá números del sorteo: 3'], 'aviso "Entregá números del sorteo: 3"');
+  });
+
+  caso('Cierre después de 1 a 4', () => {
+    const z = calcularCierre(caja, caja.botones);
+    igual(filas(z.entradas), [['Hombres', 3, 30000], ['Mujeres', 2, 14000]], 'Hombres 3 $ 30.000 · Mujeres 2 $ 14.000');
+    igual([z.entradasCantidad, z.entradasMonto], [5, 44000], 'Subtotal entradas 5 $ 44.000');
+    igual(filas(z.extras), [['Tribunas', 2, 4000], ['Sorteos', 3, 6000]], 'Tribunas 2 $ 4.000 · Sorteos 3 $ 6.000');
+    igual(filas(z.gratis), [['Jugadores', 1, 0], ['Menores', 1, 0]], 'Jugadores 1 · Menores 1');
+    igual(z.personas, 7, 'Ingresaron en total 7');
+    igual([z.efectivo, z.transferencia, z.total], [47000, 7000, 54000], 'Efectivo $ 47.000 · Transferencia $ 7.000 · TOTAL $ 54.000');
+    igual(z.transferencias, [{ hora: '15:43', nombre: 'Juan', monto: 7000 }], 'detalle: 15:43 Juan $ 7.000');
+    igual([z.fondo, z.esperado], [20000, 67000], 'Tiene que haber $ 67.000');
+    igual([z.anuladas, z.anuladoMonto], [0, 0], 'sin anuladas');
+  });
+
+  caso('5. Anular la venta 4', () => {
+    const c = anularVenta(caja, v4.id, hora(16, 0));
+    igual(c.ventas.length, 4, 'la venta anulada queda en la lista');
+    const z = calcularCierre(c, c.botones);
+    igual(filas(z.entradas)[0], ['Hombres', 2, 20000], 'Hombres 2 ($ 20.000)');
+    igual(filas(z.extras)[1], ['Sorteos', 0, 0], 'Sorteos 0');
+    igual([z.efectivo, z.total, z.personas, z.esperado], [31000, 38000, 6, 51000], 'Efectivo $ 31.000 · TOTAL $ 38.000 · Ingresaron 6 · Tiene que haber $ 51.000');
+    igual([z.anuladas, z.anuladoMonto], [1, 16000], 'Ventas anuladas 1 ($ 16.000)');
+    const otra = anularVenta(c, v4.id, hora(16, 5));
+    igual(otra.ventas[3].anuladaEn, hora(16, 0), 'no se anula dos veces');
+    const sig = armarVenta(c.botones, { hombre: 1 }, { id: 5, medio: 'efectivo', ultimoTicket: c.ultimoTicket, ahora: hora(16, 10) });
+    igual(sig.venta.tickets[0].numero, 6, 'el próximo ticket es el N° 0006');
+  });
+
+  caso('6. De visitante', () => {
+    igual(botonesParaVender(botonesDeFabrica(), 'visitante').map((b) => b.nombre), ['Hombre', 'Mujer', 'Jugador', 'Menor'], 'no aparecen Tribuna ni Sorteo para vender');
+    const c = cajaDePrueba('visitante');
+    cobrar(c, { hombre: 1 }, 'efectivo', false, hora(15, 41));
+    const z = calcularCierre(c, c.botones);
+    igual(z.extras, [], 'no aparecen en el cierre');
+    igual(botonesParaVender(botonesDeFabrica(), 'local').map((b) => b.nombre), ['Hombre', 'Mujer', 'Tribuna', 'Sorteo', 'Jugador', 'Menor'], 'de local aparecen todos, en orden');
+  });
+
+  caso('7. Socio: Hombre a $ 8.000', () => {
+    const b = botonesDeFabrica();
+    b[0].precioSocio = 8000;
+    igual(totalCarrito(b, { hombre: 1 }, true).total, 8000, 'total cargado $ 8.000');
+    const v = armarVenta(b, { hombre: 1 }, { id: 1, medio: 'efectivo', socio: true, ultimoTicket: 0, ahora: hora(15, 41) }).venta;
+    igual(v.total, 8000, 'total $ 8.000');
+    igual(v.socio, true, 'la venta guarda que fue de socio');
+    igual(v.tickets[0].titulo, 'ENTRADA GENERAL · SOCIO', 'título "ENTRADA GENERAL · SOCIO"');
+    const t = armarVenta(b, { hombre: 1, tribuna: 1 }, { id: 2, medio: 'efectivo', socio: true, ultimoTicket: 1, ahora: hora(15, 42) }).venta;
+    igual(t.tickets[1].detalle, '', 'la tribuna no lleva SOCIO');
+    igual(t.total, 10000, 'la tribuna cobra precio normal');
+  });
+
+  caso('8. Hombre "uno por persona", Tribuna "uno por venta"', () => {
+    const b = botonesDeFabrica();
+    b[0].ticket = 'persona';
+    b[2].ticket = 'venta';
+    const v = armarVenta(b, { hombre: 2, tribuna: 1 }, { id: 1, medio: 'efectivo', ultimoTicket: 0, ahora: hora(15, 41) }).venta;
+    igual(v.tickets.length, 3, '3 tickets');
+    igual([v.tickets[0].clase, v.tickets[0].titulo, v.tickets[0].cuerpo, v.tickets[0].total],
+      ['combinado', 'TRIBUNA', [{ texto: '1 TRIBUNA', monto: '$ 2.000' }], 2000], 'primero el combinado TRIBUNA / 1 TRIBUNA $ 2.000 / TOTAL $ 2.000');
+    igual(v.tickets.slice(1).map((t) => [t.clase, t.titulo, t.detalle, t.total]),
+      [['individual', 'ENTRADA GENERAL', 'HOMBRE', 10000], ['individual', 'ENTRADA GENERAL', 'HOMBRE', 10000]], 'después dos ENTRADA GENERAL / HOMBRE / $ 10.000');
+    igual(v.tickets.map((t) => t.numero), [1, 2, 3], 'numerados en ese orden');
+  });
+
+  caso('9. Hombre y Tribuna "uno por venta"', () => {
+    const b = botonesDeFabrica();
+    b[2].ticket = 'venta';
+    const v = armarVenta(b, { hombre: 1, tribuna: 1 }, { id: 1, medio: 'efectivo', ultimoTicket: 0, ahora: hora(15, 41) }).venta;
+    igual([v.tickets.length, v.tickets[0].titulo], [1, 'COMPROBANTE'], '1 ticket con título COMPROBANTE');
+  });
+
+  caso('10. Cambiar el precio de Hombre con ventas hechas', () => {
+    const c = cajaDePrueba();
+    const v = cobrar(c, { hombre: 2 }, 'efectivo', false, hora(15, 41));
+    const antes = calcularCierre(c, c.botones);
+    c.botones[0].precio = 12000;
+    const despues = calcularCierre(c, c.botones);
+    igual([v.total, v.lineas[0].precioUnitario], [20000, 10000], 'la venta guarda su precio');
+    igual(despues, antes, 'el cierre no cambia');
+    igual(cobrar(c, { hombre: 1 }, 'efectivo', false, hora(15, 50)).total, 12000, 'la venta siguiente usa el precio nuevo');
+  });
+
+  caso('11. Ocultar Mujer después de venderle', () => {
+    const c = cajaDePrueba();
+    cobrar(c, { mujer: 2 }, 'efectivo', false, hora(15, 41));
+    const b = c.botones.map((x) => Object.assign({}, x, { visible: x.id !== 'mujer' }));
+    igual(botonesParaVender(b, 'local').some((x) => x.id === 'mujer'), false, 'no aparece para vender');
+    igual(filas(calcularCierre(c, b).entradas), [['Hombres', 0, 0], ['Mujeres', 2, 14000]], 'sigue en el cierre');
+    const sinVentas = calcularCierre(cajaDePrueba(), b);
+    igual(filas(sinVentas.entradas), [['Hombres', 0, 0]], 'en una caja sin ventas de Mujer no aparece');
+  });
+
+  caso('Guardado', () => {
+    const alm = almacenDeMentira();
+    const g = crearGuardado(alm);
+    const cfg = g.config();
+    igual(cfg.botones.map((b) => b.nombre), ['Hombre', 'Mujer', 'Tribuna', 'Sorteo', 'Jugador', 'Menor'], 'la primera vez trae los botones de fábrica');
+    igual([cfg.transf, cfg.sociosActivo], [{ alias: '', titular: '', banco: '' }, false], 'sin alias cargado y sin socios');
+    igual(JSON.parse(alm.datos.entradas_config).formato, 1, 'la configuración queda guardada con número de formato');
+    igual([g.caja(), g.historial()], [null, []], 'sin caja abierta ni historial');
+    cfg.botones[0].precio = 11000;
+    g.guardarConfig(cfg);
+    igual(crearGuardado(alm).config().botones[0].precio, 11000, 'los cambios se leen de nuevo');
+    const c = cajaDePrueba();
+    cobrar(c, { hombre: 1 }, 'efectivo', false, hora(15, 41));
+    igual(g.guardarCaja(c), true, 'guarda la caja');
+    igual(crearGuardado(alm).caja(), c, 'al volver a abrir, la misma caja con sus ventas');
+    g.guardarHistorial([c]);
+    igual(crearGuardado(alm).historial().length, 1, 'historial');
+    alm.datos.entradas_caja = '{roto';
+    igual(g.caja(), null, 'si lo guardado está roto, no se rompe la app');
+    igual(alm.datos.entradas_caja_danado, '{roto', '…y se aparta una copia para no perderla');
+    const lleno = { getItem: () => null, setItem: () => { throw new Error('lleno'); } };
+    igual(crearGuardado(lleno).guardarCaja(c), false, 'si no se puede guardar, avisa (devuelve false)');
+  });
+
+  const r = document.getElementById('resumen');
+  r.textContent = fallaTotal ? fallaTotal + ' fallan · ' + okTotal + ' bien' : 'Todo bien: ' + okTotal + ' comprobaciones';
+  r.style.color = fallaTotal ? '#A32A1E' : '#1C6B43';
+}
+</script>
+</body>
+</html>

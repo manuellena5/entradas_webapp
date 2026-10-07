@@ -1,7 +1,7 @@
 // Primero lo guardado, siempre: en la cancha la señal es mala y una red lenta
 // dejaría la app colgada. Las versiones nuevas llegan cuando cambia este archivo
 // (CACHE_NAME), se instalan por detrás y se activan cuando la persona toca el aviso.
-const CACHE_NAME = 'entradas-v1';
+const CACHE_NAME = 'entradas-v2';
 
 const ARCHIVOS = [
   './',
@@ -39,7 +39,10 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Las pruebas van siempre a la red, para probar lo último que se publicó.
+  if (url.pathname.endsWith('/tests.html') || req.cache === 'no-store') return;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);

@@ -176,10 +176,284 @@ function horaTxt(iso) {
   return dosCifras(d.getHours()) + ':' + dosCifras(d.getMinutes());
 }
 function fechaHoraTxt(iso) { return fechaTxt(iso) + ' ' + horaTxt(iso); }
+
+// ---------- Botones ----------
+
+const GRUPOS = ['entrada', 'extra', 'gratis'];
+
+function botonesDeFabrica() {
+  const b = (id, nombre, grupo, precio, ticket, titulo, aviso, orden) =>
+    ({ id, nombre, grupo, precio, precioSocio: precio, visible: true, ticket, titulo, aviso, orden });
+  return [
+    b('hombre', 'Hombre', 'entrada', 10000, 'venta', 'ENTRADA GENERAL', '', 1),
+    b('mujer', 'Mujer', 'entrada', 7000, 'venta', 'ENTRADA GENERAL', '', 2),
+    b('tribuna', 'Tribuna', 'extra', 2000, 'persona', 'TRIBUNA', '', 1),
+    b('sorteo', 'Sorteo', 'extra', 2000, 'no', 'SORTEO', 'Entregá números del sorteo', 2),
+    b('jugador', 'Jugador', 'gratis', 0, 'no', 'SIN CARGO', '', 1),
+    b('menor', 'Menor', 'gratis', 0, 'no', 'SIN CARGO', '', 2)
+  ];
+}
+
+// Por grupo (entrada, extra, gratis) y dentro del grupo por orden.
+function ordenarBotones(botones) {
+  return botones.slice().sort((a, b) =>
+    (GRUPOS.indexOf(a.grupo) - GRUPOS.indexOf(b.grupo)) || (a.orden - b.orden));
+}
+
+// De visitante no se venden los extras.
+function botonesParaVender(botones, condicion) {
+  return ordenarBotones(botones).filter((b) => b.visible && (condicion === 'local' || b.grupo !== 'extra'));
+}
+
+function precioDe(boton, socio) {
+  if (boton.grupo === 'gratis') return 0;
+  return socio && boton.grupo === 'entrada' ? boton.precioSocio : boton.precio;
+}
+
+// Total y cantidad de lo cargado, antes de cobrar.
+function totalCarrito(botones, carrito, socio) {
+  let total = 0;
+  let cantidad = 0;
+  botones.forEach((b) => {
+    const q = carrito[b.id] || 0;
+    total += q * precioDe(b, socio);
+    cantidad += q;
+  });
+  return { total, cantidad };
+}
+
+// "2 Hombres · 1 Mujer · 2 Tribunas"
+function resumenLineas(lineas) {
+  return lineas.map((l) => cantidadDe(l.cantidad, l.nombre)).join(' · ');
+}
+
+// ---------- Venta y tickets ----------
+
+const MEDIOS = { efectivo: 'Efectivo', transferencia: 'Transferencia', sin_cargo: 'Sin cargo' };
+
+function numeroTicket(n) { return String(n).padStart(4, '0'); }
+
+// Arma una venta con sus tickets. No guarda nada.
+// op = { id, medio: 'efectivo' | 'transferencia', socio, ultimoTicket, ahora (ISO) }
+// Devuelve { venta, ultimoTicket } o null si no hay nada cargado.
+function armarVenta(botones, carrito, op) {
+  const socio = !!op.socio;
+  const lineas = [];
+  ordenarBotones(botones).forEach((b) => {
+    const cantidad = carrito[b.id] || 0;
+    if (cantidad <= 0) return;
+    const precioUnitario = precioDe(b, socio);
+    lineas.push({
+      botonId: b.id, nombre: b.nombre, grupo: b.grupo, ticket: b.ticket, titulo: b.titulo,
+      aviso: b.aviso || '', cantidad, precioUnitario, subtotal: precioUnitario * cantidad
+    });
+  });
+  if (!lineas.length) return null;
+
+  const total = lineas.reduce((s, l) => s + l.subtotal, 0);
+  const esSocio = (l) => socio && l.grupo === 'entrada';
+  const tickets = [];
+
+  // Un ticket combinado con todas las líneas "uno por venta".
+  const juntas = lineas.filter((l) => l.ticket === 'venta');
+  if (juntas.length) {
+    const mismo = juntas.every((l) => l.titulo === juntas[0].titulo);
+    tickets.push({
+      clase: 'combinado',
+      titulo: (mismo ? juntas[0].titulo : 'COMPROBANTE') + (juntas.some(esSocio) ? ' · SOCIO' : ''),
+      detalle: '',
+      cuerpo: juntas.map((l) => ({
+        texto: l.cantidad + ' ' + l.nombre.toUpperCase(),
+        monto: l.subtotal ? plata(l.subtotal) : 's/cargo'
+      })),
+      total: juntas.reduce((s, l) => s + l.subtotal, 0)
+    });
+  }
+
+  // Un ticket individual por cada unidad de las líneas "uno por persona".
+  lineas.filter((l) => l.ticket === 'persona').forEach((l) => {
+    const nombre = l.nombre.toUpperCase();
+    let detalle = nombre === l.titulo ? '' : nombre;
+    if (esSocio(l)) detalle = detalle ? detalle + ' · SOCIO' : 'SOCIO';
+    for (let i = 0; i < l.cantidad; i++) {
+      tickets.push({ clase: 'individual', titulo: l.titulo, detalle, cuerpo: [], total: l.precioUnitario });
+    }
+  });
+
+  let n = op.ultimoTicket || 0;
+  tickets.forEach((t) => { n += 1; t.numero = n; });
+
+  return {
+    venta: {
+      id: op.id, fechaHora: op.ahora, medio: total > 0 ? op.medio : 'sin_cargo', total, socio,
+      pagador: '', anuladaEn: null, lineas, tickets
+    },
+    ultimoTicket: n
+  };
+}
+
+// "Efectivo", "Transferencia de Juan", "Sin cargo"
+function medioTxt(venta) {
+  const txt = MEDIOS[venta.medio] || '';
+  return venta.medio === 'transferencia' && venta.pagador ? txt + ' de ' + venta.pagador : txt;
+}
+
+// Recordatorios después de cobrar.
+function avisosDeVenta(venta) {
+  const avisos = [];
+  const sinTicket = [];
+  venta.lineas.forEach((l) => {
+    if (l.aviso) avisos.push(l.aviso + ': ' + l.cantidad);
+    else if (l.ticket === 'no') sinTicket.push(cantidadDe(l.cantidad, l.nombre));
+  });
+  if (sinTicket.length) avisos.push('Anotado sin ticket: ' + sinTicket.join(' · ') + '.');
+  if (venta.medio === 'transferencia') avisos.push('Pedí ver el comprobante de la transferencia.');
+  return avisos;
+}
+
+// Billetes con los que puede pagar: el total redondeado hacia arriba a
+// 10.000, 20.000, 50.000 y 100.000; mayores que el total, sin repetir, los tres primeros.
+function sugerenciasDePago(total) {
+  const out = [];
+  [10000, 20000, 50000, 100000].forEach((b) => {
+    const arriba = Math.ceil(total / b) * b;
+    if (arriba > total && out.indexOf(arriba) < 0) out.push(arriba);
+  });
+  return out.slice(0, 3);
+}
+
+// ---------- Caja ----------
+
+// Los botones se copian al abrir: el cierre de una caja no cambia
+// aunque después se cambie la configuración.
+function nuevaCaja(op) {
+  return {
+    id: op.ahora, abiertaEn: op.ahora, cerradaEn: null,
+    condicion: op.condicion, rival: op.rival || '', fondo: Math.max(0, Math.round(Number(op.fondo) || 0)),
+    efectivoContado: null, ultimoTicket: 0,
+    botones: JSON.parse(JSON.stringify(op.botones)),
+    ventas: []
+  };
+}
+
+// Devuelve una caja nueva con la venta anulada. No libera los números de ticket.
+function anularVenta(caja, ventaId, ahora) {
+  return Object.assign({}, caja, {
+    ventas: caja.ventas.map((v) => (v.id === ventaId && !v.anuladaEn ? Object.assign({}, v, { anuladaEn: ahora }) : v))
+  });
+}
+
+// Informe de cierre. Todo sale de las ventas no anuladas, con la copia guardada en cada una.
+function calcularCierre(caja, botones) {
+  const acum = {};
+  let efectivo = 0;
+  let transferencia = 0;
+  let anuladas = 0;
+  let anuladoMonto = 0;
+  const transferencias = [];
+
+  caja.ventas.forEach((v) => {
+    if (v.anuladaEn) { anuladas += 1; anuladoMonto += v.total; return; }
+    if (v.medio === 'efectivo') efectivo += v.total;
+    if (v.medio === 'transferencia') {
+      transferencia += v.total;
+      transferencias.push({ hora: horaTxt(v.fechaHora), nombre: v.pagador || 'Sin nombre', monto: v.total });
+    }
+    v.lineas.forEach((l) => {
+      const a = acum[l.botonId] || (acum[l.botonId] = { nombre: l.nombre, grupo: l.grupo, cantidad: 0, monto: 0 });
+      a.cantidad += l.cantidad;
+      a.monto += l.subtotal;
+    });
+  });
+
+  const local = caja.condicion === 'local';
+  const filas = { entrada: [], extra: [], gratis: [] };
+  const fila = (nombre, a) => ({ nombre: enPlural(nombre), cantidad: a ? a.cantidad : 0, monto: a ? a.monto : 0 });
+  const vistos = {};
+  ordenarBotones(botones).forEach((b) => {
+    vistos[b.id] = true;
+    const a = acum[b.id];
+    if (!a && !b.visible) return;                       // oculto y sin ventas: no aparece
+    if (!a && b.grupo === 'extra' && !local) return;    // de visitante no hay extras
+    filas[b.grupo].push(fila(a ? a.nombre : b.nombre, a));
+  });
+  Object.keys(acum).forEach((id) => {
+    if (!vistos[id]) filas[acum[id].grupo].push(fila(acum[id].nombre, acum[id]));
+  });
+
+  const suma = (lista, campo) => lista.reduce((s, f) => s + f[campo], 0);
+  const fondo = caja.fondo || 0;
+  return {
+    entradas: filas.entrada,
+    entradasCantidad: suma(filas.entrada, 'cantidad'),
+    entradasMonto: suma(filas.entrada, 'monto'),
+    extras: filas.extra,
+    gratis: filas.gratis,
+    personas: suma(filas.entrada, 'cantidad') + suma(filas.gratis, 'cantidad'),
+    efectivo, transferencia, transferencias,
+    total: efectivo + transferencia,
+    fondo,
+    esperado: fondo + efectivo,
+    anuladas, anuladoMonto
+  };
+}
+
+// ---------- Guardado ----------
+// Cada clave guarda { formato, datos } para poder migrar si cambia la forma.
+
+const FORMATO = 1;
+const CLAVES = { config: 'entradas_config', caja: 'entradas_caja', historial: 'entradas_historial' };
+
+function configInicial() {
+  return {
+    club: 'Club Deportivo Mitre',
+    sociosActivo: false,
+    transf: { alias: '', titular: '', banco: '' },
+    botones: botonesDeFabrica()
+  };
+}
+
+// almacen: localStorage en la app; uno de mentira en las pruebas.
+function crearGuardado(almacen) {
+  const escribir = (clave, datos) => {
+    try {
+      almacen.setItem(clave, JSON.stringify({ formato: FORMATO, datos }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+  const leer = (clave) => {
+    let txt = null;
+    try { txt = almacen.getItem(clave); } catch (e) { return undefined; }
+    if (txt === null) return undefined;
+    try {
+      const o = JSON.parse(txt);
+      if (o && o.formato === FORMATO) return o.datos;
+    } catch (e) { /* abajo */ }
+    // No se entiende lo guardado: se aparta una copia para no pisarla.
+    try { almacen.setItem(clave + '_danado', txt); } catch (e) { /* nada */ }
+    return undefined;
+  };
+  return {
+    config() {
+      const c = leer(CLAVES.config);
+      if (c) return c;
+      const nueva = configInicial();
+      escribir(CLAVES.config, nueva);
+      return nueva;
+    },
+    caja() { return leer(CLAVES.caja) || null; },
+    historial() { return leer(CLAVES.historial) || []; },
+    guardarConfig(c) { return escribir(CLAVES.config, c); },
+    guardarCaja(c) { return escribir(CLAVES.caja, c); },
+    guardarHistorial(h) { return escribir(CLAVES.historial, h); }
+  };
+}
 </script>
 
 <script>
-const APP_VERSION = 'v1';
+const APP_VERSION = 'v2';
 
 document.getElementById('version').textContent = APP_VERSION;
 document.getElementById('muestra-fecha').textContent = fechaHoraTxt(new Date().toISOString());
