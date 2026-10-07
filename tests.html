@@ -153,7 +153,7 @@ function correr() {
     igual(filas(z.gratis), [['Jugadores', 1, 0], ['Menores', 1, 0]], 'Jugadores 1 · Menores 1');
     igual(z.personas, 7, 'Ingresaron en total 7');
     igual([z.efectivo, z.transferencia, z.total], [47000, 7000, 54000], 'Efectivo $ 47.000 · Transferencia $ 7.000 · TOTAL $ 54.000');
-    igual(z.transferencias, [{ hora: '15:43', nombre: 'Juan', monto: 7000 }], 'detalle: 15:43 Juan $ 7.000');
+    igual('transferencias' in z, false, 'las transferencias no se listan una por una');
     igual([z.fondo, z.esperado], [20000, 67000], 'Tiene que haber $ 67.000');
     igual([z.anuladas, z.anuladoMonto], [0, 0], 'sin anuladas');
   });
@@ -170,6 +170,45 @@ function correr() {
     igual(otra.ventas[3].anuladaEn, hora(16, 0), 'no se anula dos veces');
     const sig = armarVenta(c.botones, { hombre: 1 }, { id: 5, medio: 'efectivo', ultimoTicket: c.ultimoTicket, ahora: hora(16, 10) });
     igual(sig.venta.tickets[0].numero, 6, 'el próximo ticket es el N° 0006');
+  });
+
+  caso('Arqueo, compartir y descargar (W4)', () => {
+    igual([arqueo(67000, 67000), arqueo(70000, 67000), arqueo(60000, 67000)], [
+      { coincide: true, texto: 'Coincide con lo esperado.' },
+      { coincide: false, texto: 'Sobran $ 3.000.' },
+      { coincide: false, texto: 'Faltan $ 7.000.' }], 'Coincide / Sobran $ x / Faltan $ x');
+
+    const c = anularVenta(caja, v4.id, hora(16, 0));
+    c.efectivoContado = 51000;
+    const t = textoCierre(c, 'Club Deportivo Mitre');
+    igual(t.split('\n'), [
+      '*CIERRE DE ENTRADAS*', 'Club Deportivo Mitre', 'vs. Rival · Local · 07/10/2026',
+      '', '*Entradas*', 'Hombres: 2 · $ 20.000', 'Mujeres: 2 · $ 14.000', 'Subtotal: 4 · $ 34.000',
+      '', '*Extras*', 'Tribunas: 2 · $ 4.000', 'Sorteos: 0 · $ 0',
+      '', '*Sin cargo*', 'Jugadores: 1', 'Menores: 1', 'Ingresaron en total: 6',
+      '', '*Cobrado*', 'Efectivo: $ 31.000', 'Transferencia: $ 7.000', '*TOTAL: $ 38.000*',
+      '', '*Efectivo en caja*', 'Para vuelto: $ 20.000', 'Ventas: $ 31.000', 'Tiene que haber: $ 51.000',
+      'Contado: $ 51.000. Coincide con lo esperado.',
+      '', 'Ventas anuladas: 1 · $ 16.000'], 'texto para WhatsApp, sin listar las transferencias una por una');
+    igual(textoCierre(cajaDePrueba('visitante'), 'Club').includes('*Extras*'), false, 'de visitante, el texto no trae extras');
+
+    const csv = csvDetalle(c);
+    igual(csv.charCodeAt(0), 0xFEFF, 'el CSV empieza con BOM (Excel lee bien las tildes)');
+    const filasCsv = csv.slice(1).trim().split('\r\n').map((f) => f.split(';'));
+    igual(filasCsv[0], ['Fecha', 'Hora', 'Venta', 'Medio', 'Quién transfirió', 'Qué', 'Tipo', 'Cantidad', 'Precio', 'Subtotal', 'Total de la venta', 'Anulada'], 'encabezado con ";"');
+    igual(filasCsv.length - 1, 3 + 2 + 1 + 2, 'una fila por línea de venta (8)');
+    igual(filasCsv[4], ['07/10/2026', '15:43', '2', 'Transferencia', 'Juan', 'Mujer', 'Entrada', '1', '7000', '7000', '7000', ''], 'fila de la transferencia, con el nombre');
+    const sumaCsv = filasCsv.slice(1).filter((f) => f[11] === '').reduce((s, f) => s + Number(f[9]), 0);
+    igual(sumaCsv, 38000, 'la suma de Subtotal sin anuladas da el TOTAL del cierre ($ 38.000)');
+    igual(filasCsv.slice(1).filter((f) => f[11] === 'Sí').length, 2, 'la venta anulada viene marcada');
+    const raro = cajaDePrueba();
+    cobrar(raro, { mujer: 1 }, 'transferencia', false, hora(15, 41));
+    raro.ventas[0].pagador = 'Pérez; "Tito"';
+    igual(csvDetalle(raro).split('\r\n')[1].split(';').slice(4, 7).join(';'), '"Pérez; ""Tito""";Mujer', 'un nombre con ";" o comillas no rompe las columnas');
+    igual([nombreArchivo(c), nombreArchivo(Object.assign({}, c, { rival: 'Atlético Ñandú FC' })), nombreArchivo(Object.assign({}, c, { rival: '' }))],
+      ['entradas-2026-10-07-rival.csv', 'entradas-2026-10-07-atletico-nandu-fc.csv', 'entradas-2026-10-07.csv'], 'nombre del archivo');
+    const cerrada = cerrarCaja(c, hora(18, 0));
+    igual([cerrada.cerradaEn, c.cerradaEn, cerrada.ventas.length], [hora(18, 0), null, 4], 'cerrar marca la hora y no toca las ventas');
   });
 
   caso('6. De visitante', () => {
@@ -233,6 +272,13 @@ function correr() {
     igual(filas(calcularCierre(c, b).entradas), [['Hombres', 0, 0], ['Mujeres', 2, 14000]], 'sigue en el cierre');
     const sinVentas = calcularCierre(cajaDePrueba(), b);
     igual(filas(sinVentas.entradas), [['Hombres', 0, 0]], 'en una caja sin ventas de Mujer no aparece');
+  });
+
+  caso('Botón nuevo (W5)', () => {
+    const b = botonesDeFabrica();
+    igual(botonNuevo(b, 'entrada', 'x'), { id: 'x', nombre: 'Nueva', grupo: 'entrada', precio: 0, precioSocio: 0, visible: true, ticket: 'venta', titulo: 'ENTRADA GENERAL', aviso: '', orden: 3 }, 'entrada: uno por venta, ENTRADA GENERAL, al final del grupo');
+    igual([botonNuevo(b, 'extra', 'y').ticket, botonNuevo(b, 'extra', 'y').titulo], ['persona', 'EXTRA'], 'extra: uno por persona, EXTRA');
+    igual([botonNuevo(b, 'gratis', 'z').ticket, botonNuevo(b, 'gratis', 'z').titulo, botonNuevo(b, 'gratis', 'z').precio], ['no', 'SIN CARGO', 0], 'no pagan: no imprime, SIN CARGO, $ 0');
   });
 
   caso('Guardado', () => {

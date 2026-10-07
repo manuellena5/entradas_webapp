@@ -129,7 +129,7 @@ Reglas para una venta:
 
 - Arriba: nombre del club y `vs. {rival}` (o "Partido de hoy" si no se cargó rival).
 - Abajo: fecha y hora, número de ticket y medio de cobro.
-- Si la venta fue a precio de socio, los tickets de botones del grupo `entrada` llevan ` · SOCIO` (en el título del combinado, en el detalle del individual).
+- Si la venta fue a precio de socio, los tickets de botones del grupo `entrada` llevan ` · SOCIO` (en el título del combinado, en el detalle del individual). Si el combinado junta títulos distintos, sale `COMPROBANTE · SOCIO`. Si el detalle del individual queda vacío, dice `SOCIO`.
 - El nombre de quien transfirió **no** se imprime.
 
 ### Ejemplo en papel de 58 mm (32 columnas)
@@ -182,6 +182,7 @@ La app **no verifica** transferencias. Se anotan y se concilian después contra 
 
 - Lista de ventas de la caja, la más nueva arriba: qué se vendió, hora, medio, total.
 - Las transferencias con nombre se leen "Transferencia de {nombre}".
+- Filtro por medio: **Todas**, **Efectivo**, **Transferencia**. Arriba se ve cuántas ventas y cuánto suman las que se están mirando, sin contar las anuladas. Sirve para controlar las transferencias contra el extracto.
 - "Anular" pide confirmación en el mismo botón (primer toque: "¿Anular?"; segundo toque: anula).
 - Una venta anulada queda en la lista, tachada y marcada "Anulada". No se borra ni se puede desanular.
 - Las anuladas no suman en ningún total del cierre; se informan aparte.
@@ -213,7 +214,7 @@ Informe con forma de ticket. Todo sale de las ventas **no anuladas**, usando la 
 | Extras | Una fila por botón del grupo `extra`: cantidad y monto. Solo de local. |
 | SIN CARGO | Una fila por botón del grupo `gratis`: cantidad. |
 | Ingresaron en total | Cantidades del grupo `entrada` + cantidades del grupo `gratis`. |
-| COBRADO | Efectivo, Transferencia y TOTAL. Debajo de Transferencia, el detalle de cada una: hora, nombre (o "Sin nombre") y monto. |
+| COBRADO | Efectivo, Transferencia y TOTAL. Las transferencias **no** se listan una por una: pueden ser muchas y el cierre quedaría muy largo. Se ven en Ventas, con el filtro Transferencia. |
 | EFECTIVO EN CAJA | Para vuelto + Ventas en efectivo = "Tiene que haber". |
 | Ventas anuladas | Cantidad y monto. |
 
@@ -276,7 +277,7 @@ Cierre después de 1 a 4:
 | Menores | 1 | — |
 | Ingresaron en total | 7 | — |
 | Efectivo | — | $ 47.000 |
-| Transferencia | — | $ 7.000 (detalle: hora, Juan, $ 7.000) |
+| Transferencia | — | $ 7.000 |
 | TOTAL | — | $ 54.000 |
 | Tiene que haber | — | $ 67.000 |
 

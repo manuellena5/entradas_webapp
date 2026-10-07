@@ -99,6 +99,7 @@ html { touch-action: manipulation; }
   display: flex; flex-direction: column;
 }
 .desplaza { flex: 1; min-height: 0; overflow-y: auto; }
+.desplaza > * { flex-shrink: 0; }
 .rotulo { font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-2); }
 .rotulo-panel { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-2-gris); }
 .titulo-inicio { margin: 0; font-family: var(--f-titulo); font-weight: 700; font-size: 42px; line-height: 0.95; text-transform: uppercase; }
@@ -207,6 +208,8 @@ html { touch-action: manipulation; }
 .barra-dato { font-size: 15px; color: var(--texto-2-barra); }
 
 /* ---------- Ventas ---------- */
+.filtros { padding: 12px 12px 0; }
+.b-filtro { height: 48px; border-radius: 12px; font-size: 17px; font-weight: 700; padding: 0 4px; }
 .lista { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .vacio { padding: 32px 12px; text-align: center; font-size: 18px; color: var(--texto-2); }
 .venta { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--superficie); }
@@ -232,10 +235,50 @@ html { touch-action: manipulation; }
 .z-q { width: 36px; text-align: right; }
 .z-m { width: 104px; text-align: right; }
 .z-m2 { width: 120px; text-align: right; }
-.z-detalle { font-size: 13px; }
-.z-detalle .z-n { padding-left: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.z-m3 { width: 96px; text-align: right; }
 .z-total { font-size: 17px; }
+.arqueo { font-size: 18px; font-weight: 700; }
+.arqueo:empty { display: none; }
+.arqueo .bien { color: var(--verde); }
+.arqueo .mal { color: var(--rojo); }
+.mensaje { padding: 10px 14px; border-radius: 10px; background: var(--panel); font-size: 17px; font-weight: 600; }
+.b-secundario { width: 100%; flex-shrink: 0; height: 68px; border: 2px solid var(--tinta); border-radius: 14px; background: var(--superficie); color: var(--tinta); font-family: var(--f-titulo); font-weight: 700; font-size: 28px; text-transform: uppercase; }
+.b-cerrar-caja { height: 68px; border-radius: 14px; background: var(--tinta); font-size: 28px; }
+.b-ancho { width: 100%; flex-shrink: 0; }
+.texto-panel { font-size: 17px; }
+.b-volver { flex-shrink: 0; height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--superficie); color: var(--tinta); font-size: 17px; font-weight: 700; }
+.b-caja { width: 100%; border: 0; text-align: left; color: var(--tinta); }
+.contado .condensada { font-size: 30px; }
+
+/* ---------- Configurar ---------- */
+.precios-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 6px; }
+.precios-cabeza .rotulo-panel { padding-bottom: 0; }
+.b-configurar { height: 44px; padding: 0 14px; border: 2px solid var(--tinta); border-radius: 10px; background: var(--superficie); color: var(--tinta); font-size: 16px; font-weight: 700; }
+.config { padding: 6px 12px 20px; display: flex; flex-direction: column; gap: 8px; }
+.seccion { padding: 14px 4px 0; letter-spacing: 0.06em; }
+.fila-config {
+  width: 100%; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 14px; border: 0; border-radius: 12px; background: var(--superficie); color: var(--tinta); text-align: left;
+}
+.fila-config.oculta { background: var(--gratis); }
+.fila-config.fila-gris { min-height: 60px; background: var(--fondo); }
+.fc-izq { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fc-nombre { font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
+.fc-nombre.fc-chico { font-size: 18px; font-weight: 600; }
+.fc-detalle { font-size: 14px; color: var(--texto-2-gris); }
+.fc-accion { flex-shrink: 0; font-size: 15px; font-weight: 700; }
+.pastilla { flex-shrink: 0; min-width: 52px; padding: 6px 12px; border: 2px solid var(--tinta); border-radius: 10px; background: var(--superficie); color: var(--tinta); font-size: 16px; font-weight: 700; text-align: center; }
+.pastilla[data-si="true"] { background: var(--tinta); color: #FFFFFF; }
+.b-agregar { width: 100%; height: 52px; border: 2px dashed var(--tinta); border-radius: 12px; background: transparent; color: var(--tinta); font-size: 17px; font-weight: 700; }
+.campos-transf { display: flex; flex-direction: column; gap: 10px; }
+.campos-transf .campo { gap: 6px; }
+.campos-transf label { font-size: 16px; }
+.campos-transf input { height: 52px; padding: 0 14px; font-size: 19px; }
+.panel .campo input.mono { font-family: var(--f-papel); font-size: 18px; text-transform: uppercase; }
+.etiqueta-panel { font-size: 16px; }
+.b-modo { height: 64px; padding: 0 6px; border-radius: 12px; font-size: 16px; font-weight: 700; line-height: 1.15; }
+.b-listo { height: 68px; background: var(--tinta); font-size: 32px; }
+.selector-socio { padding: 10px 12px 0; gap: 8px; }
+.b-socio { height: 48px; border-radius: 12px; font-size: 18px; font-weight: 700; }
 .z-m4 { width: 130px; text-align: right; }
 
 /* ---------- Paneles ---------- */
@@ -344,6 +387,19 @@ function botonesDeFabrica() {
     b('jugador', 'Jugador', 'gratis', 0, 'no', 'SIN CARGO', '', 1),
     b('menor', 'Menor', 'gratis', 0, 'no', 'SIN CARGO', '', 2)
   ];
+}
+
+// Valores de un botón nuevo según su grupo (sección 10 de la especificación).
+const NUEVO_BOTON = {
+  entrada: { nombre: 'Nueva', ticket: 'venta', titulo: 'ENTRADA GENERAL' },
+  extra: { nombre: 'Nuevo', ticket: 'persona', titulo: 'EXTRA' },
+  gratis: { nombre: 'Nuevo', ticket: 'no', titulo: 'SIN CARGO' }
+};
+
+function botonNuevo(botones, grupo, id) {
+  const d = NUEVO_BOTON[grupo];
+  const orden = botones.filter((b) => b.grupo === grupo).reduce((m, b) => Math.max(m, b.orden), 0) + 1;
+  return { id, nombre: d.nombre, grupo, precio: 0, precioSocio: 0, visible: true, ticket: d.ticket, titulo: d.titulo, aviso: '', orden };
 }
 
 // Por grupo (entrada, extra, gratis) y dentro del grupo por orden.
@@ -482,7 +538,7 @@ function nuevaCaja(op) {
   return {
     id: op.ahora, abiertaEn: op.ahora, cerradaEn: null,
     condicion: op.condicion, rival: op.rival || '', fondo: Math.max(0, Math.round(Number(op.fondo) || 0)),
-    efectivoContado: null, ultimoTicket: 0,
+    efectivoContado: null, compartidoEn: null, ultimoTicket: 0,
     botones: JSON.parse(JSON.stringify(op.botones)),
     ventas: []
   };
@@ -502,15 +558,11 @@ function calcularCierre(caja, botones) {
   let transferencia = 0;
   let anuladas = 0;
   let anuladoMonto = 0;
-  const transferencias = [];
 
   caja.ventas.forEach((v) => {
     if (v.anuladaEn) { anuladas += 1; anuladoMonto += v.total; return; }
     if (v.medio === 'efectivo') efectivo += v.total;
-    if (v.medio === 'transferencia') {
-      transferencia += v.total;
-      transferencias.push({ hora: horaTxt(v.fechaHora), nombre: v.pagador || 'Sin nombre', monto: v.total });
-    }
+    if (v.medio === 'transferencia') transferencia += v.total;
     v.lineas.forEach((l) => {
       const a = acum[l.botonId] || (acum[l.botonId] = { nombre: l.nombre, grupo: l.grupo, cantidad: 0, monto: 0 });
       a.cantidad += l.cantidad;
@@ -542,12 +594,80 @@ function calcularCierre(caja, botones) {
     extras: filas.extra,
     gratis: filas.gratis,
     personas: suma(filas.entrada, 'cantidad') + suma(filas.gratis, 'cantidad'),
-    efectivo, transferencia, transferencias,
+    efectivo, transferencia,
     total: efectivo + transferencia,
     fondo,
     esperado: fondo + efectivo,
     anuladas, anuladoMonto
   };
+}
+
+// Efectivo contado contra lo que tiene que haber.
+function arqueo(contado, esperado) {
+  const dif = contado - esperado;
+  if (dif === 0) return { coincide: true, texto: 'Coincide con lo esperado.' };
+  return { coincide: false, texto: dif > 0 ? 'Sobran ' + plata(dif) + '.' : 'Faltan ' + plata(-dif) + '.' };
+}
+
+// Texto del cierre listo para WhatsApp (*negrita*).
+function textoCierre(caja, club) {
+  const z = calcularCierre(caja, caja.botones);
+  const fila = (f) => f.nombre + ': ' + f.cantidad + ' · ' + plata(f.monto);
+  const l = [];
+  l.push('*CIERRE DE ENTRADAS*');
+  l.push(club);
+  l.push((caja.rival ? 'vs. ' + caja.rival : 'Partido de hoy') + ' · ' + (caja.condicion === 'local' ? 'Local' : 'Visitante') + ' · ' + fechaTxt(caja.abiertaEn));
+  l.push('', '*Entradas*');
+  z.entradas.forEach((f) => l.push(fila(f)));
+  l.push('Subtotal: ' + z.entradasCantidad + ' · ' + plata(z.entradasMonto));
+  if (z.extras.length) { l.push('', '*Extras*'); z.extras.forEach((f) => l.push(fila(f))); }
+  l.push('', '*Sin cargo*');
+  z.gratis.forEach((f) => l.push(f.nombre + ': ' + f.cantidad));
+  l.push('Ingresaron en total: ' + z.personas);
+  l.push('', '*Cobrado*');
+  l.push('Efectivo: ' + plata(z.efectivo));
+  l.push('Transferencia: ' + plata(z.transferencia));
+  l.push('*TOTAL: ' + plata(z.total) + '*');
+  l.push('', '*Efectivo en caja*');
+  l.push('Para vuelto: ' + plata(z.fondo));
+  l.push('Ventas: ' + plata(z.efectivo));
+  l.push('Tiene que haber: ' + plata(z.esperado));
+  if (caja.efectivoContado !== null && caja.efectivoContado !== undefined) {
+    l.push('Contado: ' + plata(caja.efectivoContado) + '. ' + arqueo(caja.efectivoContado, z.esperado).texto);
+  }
+  l.push('', 'Ventas anuladas: ' + z.anuladas + ' · ' + plata(z.anuladoMonto));
+  return l.join('\n');
+}
+
+// Detalle para Excel: separador ";", con BOM, una fila por línea de venta.
+// Los importes van sin puntos para que se puedan sumar.
+function csvDetalle(caja) {
+  const GRUPO = { entrada: 'Entrada', extra: 'Extra', gratis: 'No paga' };
+  const campo = (v) => {
+    const s = String(v == null ? '' : v);
+    return /[;"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const filas = [['Fecha', 'Hora', 'Venta', 'Medio', 'Quién transfirió', 'Qué', 'Tipo', 'Cantidad', 'Precio', 'Subtotal', 'Total de la venta', 'Anulada']];
+  caja.ventas.forEach((v) => {
+    v.lineas.forEach((ln) => {
+      filas.push([fechaTxt(v.fechaHora), horaTxt(v.fechaHora), v.id, MEDIOS[v.medio], v.pagador || '',
+        ln.nombre, GRUPO[ln.grupo], ln.cantidad, ln.precioUnitario, ln.subtotal, v.total, v.anuladaEn ? 'Sí' : '']);
+    });
+  });
+  return '﻿' + filas.map((f) => f.map(campo).join(';')).join('\r\n') + '\r\n';
+}
+
+// Nombre del archivo: entradas-2026-10-07-rival.csv
+function nombreArchivo(caja) {
+  const d = new Date(caja.abiertaEn);
+  const fecha = d.getFullYear() + '-' + dosCifras(d.getMonth() + 1) + '-' + dosCifras(d.getDate());
+  const rival = (caja.rival || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return 'entradas-' + fecha + (rival ? '-' + rival : '') + '.csv';
+}
+
+// Cierra la caja: la devuelve marcada como cerrada. No guarda nada.
+function cerrarCaja(caja, ahora) {
+  return Object.assign({}, caja, { cerradaEn: ahora });
 }
 
 // ---------- Guardado ----------
@@ -605,11 +725,12 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v4';
+const APP_VERSION = 'v6';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
 let caja = G.caja();
+let historial = G.historial();   // cajas cerradas, la más nueva primero
 
 // Lo que no se guarda: el carrito a medio cargar se puede perder.
 const ui = {
@@ -621,6 +742,12 @@ const ui = {
   alias: false,
   pantalla: 'vender',  // con la caja abierta: vender, ventas o cierre
   confirmar: null,     // id de la venta que muestra "¿Anular?"
+  filtro: 'todas',     // ventas: todas, efectivo o transferencia
+  cerrando: false,     // panel "¿Cerrar la caja?"
+  vieja: null,         // índice en el historial de la caja cerrada que se mira
+  mensaje: '',
+  socio: false,        // la venta en curso es de socio (vuelve a "No socio" al cobrar)
+  editar: null,        // id del botón que se está cambiando en Configurar
   error: ''
 };
 
@@ -663,9 +790,13 @@ function pantallaAbrir() {
       <input id="fondo" type="text" inputmode="numeric" data-campo="fondo" value="${esc(a.fondo)}" placeholder="0" autocomplete="off">
     </div>
     <div class="precios">
-      <div class="rotulo-panel">Precios de hoy</div>
+      <div class="precios-cabeza">
+        <div class="rotulo-panel">Precios de hoy</div>
+        <button type="button" class="b-configurar" data-accion="ir" data-valor="config">Configurar</button>
+      </div>
       ${precios.map((b) => `<div class="fila"><span>${esc(b.nombre)}</span><b>${plata(b.precio)}</b></div>`).join('')}
     </div>
+    ${historial.length ? '<button type="button" class="b-chico b-ancho" data-accion="ir" data-valor="cajas">Cajas cerradas</button>' : ''}
     <div class="error" ${ui.error ? '' : 'hidden'}>${esc(ui.error)}</div>
     <div class="relleno"></div>
     <button type="button" class="boton-grande b-abrir" data-accion="abrirCaja">Abrir caja</button>
@@ -680,7 +811,7 @@ function botonVenta(b, i, chicos) {
     const c = COLORES_ENTRADA[i % COLORES_ENTRADA.length];
     return `<div class="celda">
       <button type="button" class="b-venta b-entrada${chicos ? ' chico' : ''}" style="--bg: ${c.bg}; --fg: ${c.fg}" data-accion="sumar" data-valor="${esc(b.id)}">
-        <span class="nombre">${esc(b.nombre)}</span><span class="precio">${plata(precioDe(b, false))}</span>
+        <span class="nombre">${esc(b.nombre)}</span><span class="precio">${plata(precioDe(b, esSocio()))}</span>
       </button>
       ${q ? `<div class="contador">
         <span class="cuenta" style="background: ${c.fg}; color: ${c.claro ? 'var(--tinta)' : '#FFFFFF'}">${q}</span>
@@ -715,7 +846,7 @@ function pantallaVender() {
   const extras = de('extra');
   const gratis = de('gratis');
   const chicos = entradas.length > 2;
-  const { total, cantidad } = totalCarrito(botones, ui.carrito, false);
+  const { total, cantidad } = totalCarrito(botones, ui.carrito, esSocio());
   const resumen = botones.filter((b) => ui.carrito[b.id] > 0).map((b) => cantidadDe(ui.carrito[b.id], b.nombre)).join(' · ');
   const personas = calcularCierre(caja, caja.botones).personas;
   const bloqueo = ui.cobrando || cantidad === 0 ? 'disabled' : '';
@@ -730,6 +861,10 @@ function pantallaVender() {
       <button type="button" class="b-alias" data-accion="verAlias">Alias</button>
       <div class="ingresaron"><div class="n">${personas}</div><div class="barra-sub">ingresaron</div></div>
     </div>
+    ${config.sociosActivo ? `<div class="dos selector-socio">
+      <button type="button" class="opcion b-socio" data-accion="socio" data-valor="no" aria-pressed="${!ui.socio}">No socio</button>
+      <button type="button" class="opcion b-socio" data-accion="socio" data-valor="si" aria-pressed="${ui.socio}">Socio</button>
+    </div>` : ''}
 
     <div class="desplaza zona-botones">
       ${entradas.length ? `<div class="grilla">${entradas.map((b, i) => botonVenta(b, i, chicos)).join('')}</div>` : ''}
@@ -787,13 +922,18 @@ function tarjetaVenta(v) {
 }
 
 function pantallaVentas() {
-  const activas = caja.ventas.filter((v) => !v.anuladaEn).length;
-  const lista = caja.ventas.slice().reverse();
+  const f = ui.filtro;
+  const lista = caja.ventas.filter((v) => f === 'todas' || v.medio === f).reverse();
+  const activas = lista.filter((v) => !v.anuladaEn);
+  const suma = activas.reduce((s, v) => s + v.total, 0);
+  const op = (id, txt) => `<button type="button" class="opcion b-filtro" data-accion="filtrar" data-valor="${id}" aria-pressed="${f === id}">${txt}</button>`;
+  const vacio = !caja.ventas.length ? 'Todavía no hay ventas.' : (f === 'efectivo' ? 'No hay ventas en efectivo.' : 'No hay transferencias.');
   return `
   <div class="pantalla">
-    ${barraSimple('Ventas', cantidadDe(activas, 'venta'))}
+    ${barraSimple('Ventas', cantidadDe(activas.length, 'venta') + ' · ' + plata(suma))}
+    <div class="filtros tres">${op('todas', 'Todas')}${op('efectivo', 'Efectivo')}${op('transferencia', 'Transferencia')}</div>
     <div class="desplaza lista">
-      ${lista.length ? lista.map(tarjetaVenta).join('') : '<div class="vacio">Todavía no hay ventas.</div>'}
+      ${lista.length ? lista.map(tarjetaVenta).join('') : `<div class="vacio">${vacio}</div>`}
     </div>
     ${ui.error ? `<div class="vender-error"><div class="error">${esc(ui.error)}</div></div>` : ''}
     ${pestanas()}
@@ -824,7 +964,6 @@ function papelCierre(c) {
     <div class="f">COBRADO</div>
     ${plataFila('Efectivo', plata(z.efectivo))}
     ${plataFila('Transferencia', plata(z.transferencia))}
-    ${z.transferencias.map((t) => `<div class="z-fila z-detalle"><span class="z-n">${t.hora} ${esc(t.nombre)}</span><span class="z-m3">${plata(t.monto)}</span></div>`).join('')}
     <div class="z-fila f z-total"><span class="z-n">TOTAL</span><span class="z-m4">${plata(z.total)}</span></div>
     ${corte}
     <div class="f">EFECTIVO EN CAJA</div>
@@ -836,12 +975,182 @@ function papelCierre(c) {
   </div>`;
 }
 
+function arqueoHtml(c) {
+  if (c.efectivoContado === null || c.efectivoContado === undefined) return '';
+  const a = arqueo(c.efectivoContado, calcularCierre(c, c.botones).esperado);
+  return `<span class="${a.coincide ? 'bien' : 'mal'}">${a.texto}</span>`;
+}
+
+function mensajeHtml() {
+  return ui.mensaje ? `<div class="mensaje">${esc(ui.mensaje)}</div>` : '';
+}
+
 function pantallaCierre() {
   return `
   <div class="pantalla">
     ${barraSimple('Cierre de caja', condicionTxt(caja.condicion))}
-    <div class="desplaza cierre">${papelCierre(caja)}</div>
+    <div class="desplaza cierre">
+      ${papelCierre(caja)}
+      <div class="campo">
+        <label for="contado">Efectivo contado</label>
+        <input id="contado" type="text" inputmode="numeric" data-campo="contado" value="${caja.efectivoContado === null ? '' : caja.efectivoContado}" placeholder="0" autocomplete="off">
+        <div class="arqueo" id="arqueo">${arqueoHtml(caja)}</div>
+      </div>
+      ${mensajeHtml()}
+      <button type="button" class="b-secundario" data-accion="compartir">Compartir cierre</button>
+      <button type="button" class="b-secundario" data-accion="descargar">Descargar detalle</button>
+      <button type="button" class="boton-grande b-cerrar-caja" data-accion="pedirCerrar">Cerrar caja</button>
+    </div>
     ${pestanas()}
+  </div>`;
+}
+
+function panelCerrar() {
+  return `
+  <div class="velo">
+    <div class="panel">
+      <div class="panel-titulo">¿Cerrar la caja?</div>
+      <div class="texto-panel">Después no se puede vender ni anular en esta caja. El cierre se puede volver a ver desde Abrir caja.</div>
+      ${caja.compartidoEn ? '' : `<div class="nota">Compartí el cierre antes de cerrar.</div>
+        <button type="button" class="b-secundario" data-accion="compartir">Compartir cierre</button>`}
+      ${mensajeHtml()}
+      ${ui.error ? `<div class="error">${esc(ui.error)}</div>` : ''}
+      <button type="button" class="boton-grande b-cerrar-caja" data-accion="cerrarCaja">Cerrar caja</button>
+      <button type="button" class="b-chico b-ancho" data-accion="noCerrar">Volver</button>
+    </div>
+  </div>`;
+}
+
+function barraVolver(titulo, accion, valor, etiqueta) {
+  return `<div class="barra barra-simple"><div class="barra-grande">${titulo}</div>
+    <button type="button" class="b-volver" data-accion="${accion}" ${valor ? `data-valor="${valor}"` : ''}>${etiqueta || 'Volver'}</button></div>`;
+}
+
+// ---------- Configurar ----------
+
+const MODOS = { persona: 'Un ticket por persona', venta: 'Un ticket por venta', no: 'Sin ticket' };
+const AYUDA_MODO = {
+  persona: 'Sale un ticket por cada uno. Sirve cuando alguien lo controla.',
+  venta: 'Sale un solo ticket con todo lo de la venta.',
+  no: 'Se cuenta en el cierre y no gasta papel.'
+};
+const SECCIONES = [
+  { grupo: 'entrada', titulo: 'Entradas', agregar: 'Agregar entrada' },
+  { grupo: 'extra', titulo: 'Solo cuando se juega de local', agregar: 'Agregar otro' },
+  { grupo: 'gratis', titulo: 'No pagan entrada', agregar: 'Agregar otro' }
+];
+
+function siNo(si) { return `<span class="pastilla" data-si="${si}">${si ? 'Sí' : 'No'}</span>`; }
+
+function filaConfig(b) {
+  const precio = b.grupo === 'gratis' ? 'No paga'
+    : plata(b.precio) + (config.sociosActivo && b.grupo === 'entrada' ? ' · Socios ' + plata(b.precioSocio) : '');
+  return `<button type="button" class="fila-config${b.visible ? '' : ' oculta'}" data-accion="editar" data-valor="${esc(b.id)}">
+    <span class="fc-izq"><span class="fc-nombre">${esc(b.nombre)}</span><span class="fc-detalle">${precio} · ${MODOS[b.ticket]}</span></span>
+    <span class="fc-accion">${b.visible ? 'Cambiar' : 'Oculto'}</span>
+  </button>`;
+}
+
+function pantallaConfig() {
+  const t = config.transf;
+  const campo = (id, txt, valor) => `<div class="campo">
+    <label for="${id}">${txt}</label>
+    <input id="${id}" type="text" data-campo="${id}" value="${esc(valor)}" autocomplete="off">
+  </div>`;
+  return `
+  <div class="pantalla">
+    ${barraVolver('Configurar', 'ir', 'abrir', 'Listo')}
+    <div class="desplaza config">
+      ${SECCIONES.map((sec) => `
+        <div class="rotulo seccion">${sec.titulo}</div>
+        ${ordenarBotones(config.botones).filter((b) => b.grupo === sec.grupo).map(filaConfig).join('')}
+        <button type="button" class="b-agregar" data-accion="agregar" data-valor="${sec.grupo}">${sec.agregar}</button>`).join('')}
+      <div class="rotulo seccion">Socios</div>
+      <button type="button" class="fila-config" data-accion="socios" aria-pressed="${config.sociosActivo}">
+        <span class="fc-nombre fc-chico">Precio distinto para socios</span>${siNo(config.sociosActivo)}
+      </button>
+      <div class="rotulo seccion">Datos para transferir</div>
+      <div class="campos-transf">
+        ${campo('t-alias', 'Alias', t.alias)}
+        ${campo('t-titular', 'A nombre de', t.titular)}
+        ${campo('t-banco', 'Banco o billetera', t.banco)}
+      </div>
+      <div class="error" id="error-config" hidden>No se pudo guardar. Probá de nuevo.</div>
+    </div>
+  </div>`;
+}
+
+function panelEditar() {
+  const b = config.botones.find((x) => x.id === ui.editar);
+  if (!b) return '';
+  const modo = (m, txt) => `<button type="button" class="opcion b-modo" data-accion="modo" data-valor="${m}" aria-pressed="${b.ticket === m}">${txt}</button>`;
+  return `
+  <div class="velo" style="z-index: 6">
+    <div class="panel" style="padding-top: 22px">
+      <div class="panel-titulo" id="titulo-editar">${esc(b.nombre || 'Botón')}</div>
+      <div class="campo">
+        <label for="b-nombre">Nombre del botón</label>
+        <input id="b-nombre" type="text" data-campo="b-nombre" value="${esc(b.nombre)}" autocomplete="off">
+      </div>
+      ${b.grupo !== 'gratis' ? `<div class="campo">
+        <label for="b-precio">Precio</label>
+        <input id="b-precio" type="text" inputmode="numeric" data-campo="b-precio" value="${b.precio}" autocomplete="off">
+      </div>` : ''}
+      ${config.sociosActivo && b.grupo === 'entrada' ? `<div class="campo">
+        <label for="b-socio">Precio para socios</label>
+        <input id="b-socio" type="text" inputmode="numeric" data-campo="b-socio" value="${b.precioSocio}" autocomplete="off">
+      </div>` : ''}
+      <div class="campo">
+        <div class="etiqueta etiqueta-panel">Ticket</div>
+        <div class="tres">${modo('persona', 'Uno por persona')}${modo('venta', 'Uno por venta')}${modo('no', 'No imprime')}</div>
+        <div class="ayuda">${AYUDA_MODO[b.ticket]}</div>
+      </div>
+      ${b.ticket !== 'no' ? `<div class="campo">
+        <label for="b-titulo">Título que sale en el ticket</label>
+        <input id="b-titulo" type="text" data-campo="b-titulo" class="mono" value="${esc(b.titulo)}" autocomplete="off">
+      </div>` : ''}
+      <button type="button" class="fila-config fila-gris" data-accion="visible" aria-pressed="${b.visible}">
+        <span class="fc-nombre fc-chico">Se muestra para vender</span>${siNo(b.visible)}
+      </button>
+      ${ui.error ? `<div class="error">${esc(ui.error)}</div>` : ''}
+      <button type="button" class="boton-grande b-listo" data-accion="listoEditar">Listo</button>
+    </div>
+  </div>`;
+}
+
+function pantallaCajas() {
+  return `
+  <div class="pantalla">
+    ${barraVolver('Cajas cerradas', 'ir', 'abrir')}
+    <div class="desplaza lista">
+      ${historial.map((c, i) => {
+        const z = calcularCierre(c, c.botones);
+        const n = c.ventas.filter((v) => !v.anuladaEn).length;
+        return `<button type="button" class="venta b-caja" data-accion="verCaja" data-valor="${i}">
+          <span class="venta-izq">
+            <span class="venta-resumen">${esc(partidoTxt(c.rival))}</span>
+            <span class="venta-dato">${fechaTxt(c.abiertaEn)} · ${condicionTxt(c.condicion)} · ${cantidadDe(n, 'venta')}</span>
+          </span>
+          <span class="venta-total">${plata(z.total)}</span>
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function pantallaVieja() {
+  const c = historial[ui.vieja];
+  return `
+  <div class="pantalla">
+    ${barraVolver('Cierre', 'ir', 'cajas')}
+    <div class="desplaza cierre">
+      ${papelCierre(c)}
+      ${c.efectivoContado === null ? '' : `<div class="renglon-gris contado"><span>Efectivo contado</span><span class="condensada">${plata(c.efectivoContado)}</span></div>
+        <div class="arqueo">${arqueoHtml(c)}</div>`}
+      ${mensajeHtml()}
+      <button type="button" class="b-secundario" data-accion="compartir">Compartir cierre</button>
+      <button type="button" class="b-secundario" data-accion="descargar">Descargar detalle</button>
+    </div>
   </div>`;
 }
 
@@ -900,7 +1209,7 @@ function panelCobrado() {
 
 function panelAlias() {
   const t = config.transf;
-  const { total } = totalCarrito(caja.botones, ui.carrito, false);
+  const { total } = totalCarrito(caja.botones, ui.carrito, esSocio());
   return `
   <div class="velo" style="z-index: 6">
     <div class="panel" style="padding-top: 22px">
@@ -922,10 +1231,21 @@ const desplazado = {};
 function render() {
   const antes = app.querySelector('.desplaza');
   if (antes) desplazado[antes.dataset.pantalla] = antes.scrollTop;
-  const pantalla = !caja ? 'abrir' : ui.pantalla;
-  let html = { abrir: pantallaAbrir, vender: pantallaVender, ventas: pantallaVentas, cierre: pantallaCierre }[pantalla]();
+  const conCaja = ['vender', 'ventas', 'cierre'];
+  const sinCaja = ['abrir', 'cajas', 'vieja', 'config'];
+  let pantalla = ui.pantalla;
+  if (caja && conCaja.indexOf(pantalla) < 0) pantalla = 'vender';
+  if (!caja && sinCaja.indexOf(pantalla) < 0) pantalla = 'abrir';
+  if (pantalla === 'vieja' && !historial[ui.vieja]) pantalla = 'cajas';
+  if (pantalla === 'cajas' && !historial.length) pantalla = 'abrir';
+  let html = {
+    abrir: pantallaAbrir, vender: pantallaVender, ventas: pantallaVentas, cierre: pantallaCierre,
+    cajas: pantallaCajas, vieja: pantallaVieja, config: pantallaConfig
+  }[pantalla]();
   if (caja && ui.cobrada) html += panelCobrado();
+  else if (caja && ui.cerrando) html += panelCerrar();
   else if (caja && ui.alias && pantalla === 'vender') html += panelAlias();
+  else if (!caja && pantalla === 'config' && ui.editar) html += panelEditar();
   app.innerHTML = html;
   const ahoraZona = app.querySelector('.desplaza');
   if (ahoraZona) {
@@ -956,7 +1276,7 @@ const acciones = {
     if (ui.cobrando) return;
     ui.cobrando = true;
     const r = armarVenta(caja.botones, ui.carrito, {
-      id: caja.ventas.length + 1, medio, socio: false, ultimoTicket: caja.ultimoTicket, ahora: ahora()
+      id: caja.ventas.length + 1, medio, socio: esSocio(), ultimoTicket: caja.ultimoTicket, ahora: ahora()
     });
     if (!r) { ui.cobrando = false; return; }
     const nueva = Object.assign({}, caja, { ventas: caja.ventas.concat([r.venta]), ultimoTicket: r.ultimoTicket });
@@ -968,6 +1288,7 @@ const acciones = {
     }
     caja = nueva;
     ui.carrito = {};
+    ui.socio = false;
     ui.cobrada = r.venta.id;
     ui.pagaCon = 0;
     ui.alias = false;
@@ -975,7 +1296,80 @@ const acciones = {
   },
   pagaCon(v) { ui.pagaCon = Number(v); },
   siguiente() { ui.cobrada = null; ui.cobrando = false; ui.pagaCon = 0; },
-  ir(pantalla) { ui.pantalla = pantalla; ui.alias = false; ui.error = ''; },
+  ir(pantalla) { ui.pantalla = pantalla; ui.alias = false; ui.error = ''; ui.mensaje = ''; },
+  verCaja(i) { ui.vieja = Number(i); ui.pantalla = 'vieja'; ui.mensaje = ''; desplazado.vieja = 0; },
+  async compartir() {
+    const c = caja || historial[ui.vieja];
+    ui.mensaje = '';
+    const texto = textoCierre(c, config.club);
+    let listo = false;
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: texto });
+        listo = true;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return; // la persona lo canceló
+      }
+    }
+    if (!listo) {
+      listo = await copiar(texto);
+      ui.mensaje = listo ? 'Se copió el cierre. Pegalo en WhatsApp.' : 'No se pudo compartir. Probá de nuevo.';
+    }
+    if (listo && caja && !caja.compartidoEn) {
+      const nueva = Object.assign({}, caja, { compartidoEn: ahora() });
+      if (G.guardarCaja(nueva)) caja = nueva;
+    }
+  },
+  descargar() {
+    const c = caja || historial[ui.vieja];
+    const url = URL.createObjectURL(new Blob([csvDetalle(c)], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombreArchivo(c);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  },
+  socio(v) { ui.socio = v === 'si'; },
+  editar(id) { ui.editar = id; ui.error = ''; },
+  agregar(grupo) {
+    const b = botonNuevo(config.botones, grupo, 'b' + Date.now().toString(36));
+    config.botones.push(b);
+    guardarConfig();
+    ui.editar = b.id;
+    ui.error = '';
+  },
+  modo(m) { botonEditado().ticket = m; guardarConfig(); },
+  visible() { const b = botonEditado(); b.visible = !b.visible; guardarConfig(); },
+  socios() { config.sociosActivo = !config.sociosActivo; guardarConfig(); },
+  listoEditar() {
+    const b = botonEditado();
+    b.nombre = b.nombre.trim();
+    b.titulo = b.titulo.trim();
+    if (!b.nombre) { ui.error = 'Poné un nombre.'; return; }
+    if (b.ticket !== 'no' && !b.titulo) { ui.error = 'Poné el título del ticket.'; return; }
+    if (!guardarConfig()) { ui.error = 'No se pudo guardar. Probá de nuevo.'; return; }
+    ui.editar = null;
+    ui.error = '';
+  },
+  pedirCerrar() { ui.cerrando = true; ui.mensaje = ''; ui.error = ''; },
+  noCerrar() { ui.cerrando = false; ui.mensaje = ''; ui.error = ''; },
+  cerrarCaja() {
+    const nuevo = [cerrarCaja(caja, ahora())].concat(historial);
+    if (!G.guardarHistorial(nuevo)) { ui.error = 'No se pudo cerrar la caja. Probá de nuevo.'; return; }
+    if (!G.guardarCaja(null)) {
+      G.guardarHistorial(historial);
+      ui.error = 'No se pudo cerrar la caja. Probá de nuevo.';
+      return;
+    }
+    historial = nuevo;
+    caja = null;
+    Object.assign(ui, { carrito: {}, cobrando: false, cobrada: null, alias: false, cerrando: false, confirmar: null, filtro: 'todas', pantalla: 'abrir', mensaje: '', error: '' });
+    Object.keys(desplazado).forEach((k) => { desplazado[k] = 0; });
+    if (candado) candado.release().catch(() => {});
+  },
+  filtrar(f) { ui.filtro = f; desplazado.ventas = 0; },
   // Primer toque: "¿Anular?". Segundo toque en la misma venta: anula.
   anular(id) {
     id = Number(id);
@@ -997,14 +1391,79 @@ app.addEventListener('click', (e) => {
   if (el.dataset.accion === 'cobrar') app.querySelectorAll('[data-accion="cobrar"]').forEach((b) => { b.disabled = true; });
   // Tocar cualquier otra cosa cancela el "¿Anular?".
   if (el.dataset.accion !== 'anular') ui.confirmar = null;
-  acciones[el.dataset.accion](el.dataset.valor);
+  const r = acciones[el.dataset.accion](el.dataset.valor);
   render();
+  if (r && r.then) r.then(render);
 });
+
+// Copiar al portapapeles, con un plan B para navegadores viejos.
+async function copiar(texto) {
+  try {
+    await navigator.clipboard.writeText(texto);
+    return true;
+  } catch (e) {
+    const t = document.createElement('textarea');
+    t.value = texto;
+    t.style.position = 'fixed';
+    t.style.opacity = '0';
+    document.body.appendChild(t);
+    t.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+    t.remove();
+    return ok;
+  }
+}
+
+function botonEditado() { return config.botones.find((b) => b.id === ui.editar); }
+
+function guardarConfig() {
+  const ok = G.guardarConfig(config);
+  const el = document.getElementById('error-config');
+  if (el) el.hidden = ok;
+  return ok;
+}
+
+// Con la caja abierta no se puede configurar, así que el interruptor no cambia en medio de una caja.
+function esSocio() { return config.sociosActivo && ui.socio; }
+
+function actualizarArqueo() {
+  const el = document.getElementById('arqueo');
+  if (el) el.innerHTML = arqueoHtml(caja);
+}
 
 // Los campos no redibujan la pantalla al escribir, para no perder el foco.
 app.addEventListener('input', (e) => {
   const campo = e.target.dataset.campo;
   if (campo === 'rival' || campo === 'fondo') ui.abrir[campo] = e.target.value;
+  if (campo && campo.indexOf('t-') === 0) {
+    config.transf[{ 't-alias': 'alias', 't-titular': 'titular', 't-banco': 'banco' }[campo]] = e.target.value;
+    guardarConfig();
+  }
+  if (campo && campo.indexOf('b-') === 0) {
+    const b = botonEditado();
+    if (!b) return;
+    const v = e.target.value;
+    if (campo === 'b-nombre') {
+      b.nombre = v;
+      const t = document.getElementById('titulo-editar');
+      if (t) t.textContent = v || 'Botón';
+    }
+    if (campo === 'b-precio') {
+      const nuevo = soloNumero(v);
+      if (b.precioSocio === b.precio) b.precioSocio = nuevo; // el de socios acompaña mientras sea igual
+      b.precio = nuevo;
+    }
+    if (campo === 'b-socio') b.precioSocio = soloNumero(v);
+    if (campo === 'b-titulo') b.titulo = v.toUpperCase();
+    guardarConfig();
+  }
+  if (campo === 'contado' && caja) {
+    const txt = e.target.value.replace(/\D/g, '');
+    const nueva = Object.assign({}, caja, { efectivoContado: txt === '' ? null : Number(txt) });
+    if (G.guardarCaja(nueva)) caja = nueva;
+    actualizarArqueo();
+  }
   if (campo === 'pagador' && caja) {
     const nombre = e.target.value;
     const nueva = Object.assign({}, caja, {

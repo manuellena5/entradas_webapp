@@ -37,13 +37,13 @@ Lo que se aprenda vuelve a `ESPECIFICACION.md` y de ahí a la APK.
 
 | Fase | Nombre | Estado |
 |---|---|---|
-| W0 | Base instalable y sin conexión | Pendiente |
-| W1 | Reglas y guardado | Pendiente |
-| W2 | Abrir caja, vender y cobrar | Pendiente |
-| W3 | Ventas y anulación | Pendiente |
-| W4 | Cierre y compartir | Pendiente |
-| W5 | Configurar | Pendiente |
-| W6 | Publicar e instalar | Pendiente |
+| W0 | Base instalable y sin conexión | Hecha |
+| W1 | Reglas y guardado | Hecha |
+| W2 | Abrir caja, vender y cobrar | Hecha en la compu. Falta probar en el teléfono |
+| W3 | Ventas y anulación | Hecha en la compu. Falta probar en el teléfono |
+| W4 | Cierre y compartir | Hecha en la compu. Falta probar en el teléfono (WhatsApp y Excel) |
+| W5 | Configurar | Hecha en la compu. Falta probar en el teléfono |
+| W6 | Publicar e instalar | En curso: revisión de textos hecha; falta publicar e instalar (M) |
 | W7 | Prueba en un partido | Pendiente |
 | W8 | Opcional: mandar el cierre a una planilla | Pendiente |
 
@@ -90,13 +90,17 @@ Formas:
 config = { club, sociosActivo, transf: { alias, titular, banco },
            botones: [{ id, nombre, grupo, precio, precioSocio, visible, ticket, titulo, aviso, orden }] }
 
-caja = { id, abiertaEn, cerradaEn, condicion, rival, fondo, efectivoContado, ultimoTicket,
+caja = { id, abiertaEn, cerradaEn, condicion, rival, fondo, efectivoContado, compartidoEn, ultimoTicket,
+         botones,   // copia de config.botones al abrir: el cierre de una caja vieja no cambia con la configuración
          ventas: [{ id, fechaHora, medio, total, socio, pagador, anuladaEn,
-                    lineas:  [{ botonId, nombre, grupo, ticket, aviso, cantidad, precioUnitario, subtotal }],
-                    tickets: [{ numero, clase, titulo, detalle, cuerpo, total }] }] }
+                    lineas:  [{ botonId, nombre, grupo, ticket, titulo, aviso, cantidad, precioUnitario, subtotal }],
+                    tickets: [{ numero, clase, titulo, detalle, cuerpo: [{ texto, monto }], total }] }] }
 ```
 
-Incluir un número de versión del formato en cada clave para poder migrar si cambia.
+- `condicion`: `local` o `visitante`. `medio`: `efectivo`, `transferencia` o `sin_cargo`. `clase`: `combinado` o `individual`.
+- `numero` es un entero; se muestra con cuatro cifras. `total` del ticket: en el combinado, la suma; en el individual, el precio unitario.
+
+Cada clave guarda `{ formato: 1, datos }`, para poder migrar si cambia la forma. Si lo guardado no se entiende, se aparta una copia en `{clave}_danado` y la app sigue.
 
 ---
 
