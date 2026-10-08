@@ -200,7 +200,12 @@ function correr() {
     const cb = Object.assign({}, c, { billetes: { 20000: 2, 10000: 1, 1000: 1 }, efectivoContado: 51000 });
     const tb = textoCierre(cb, 'Club Deportivo Mitre').split('\n');
     const ib = tb.indexOf('Contado: $ 51.000. Coincide con lo esperado.');
-    igual(tb.slice(ib, ib + 4), ['Contado: $ 51.000. Coincide con lo esperado.', '  $ 20.000 x 2 = $ 40.000', '  $ 10.000 x 1 = $ 10.000', '  $ 1.000 x 1 = $ 1.000'], 'el texto compartido trae los billetes cargados');
+    igual(tb.slice(ib, ib + 5), ['Contado: $ 51.000. Coincide con lo esperado.', 'Billetes: $ 51.000', '  $ 20.000 x 2 = $ 40.000', '  $ 10.000 x 1 = $ 10.000', '  $ 1.000 x 1 = $ 1.000'], 'el texto compartido trae los billetes cargados');
+    const cm = Object.assign({}, cb, { efectivoContado: 51500 });
+    const tm = textoCierre(cm, 'Club').split('\n');
+    const im = tm.indexOf('Contado: $ 51.500. Sobran $ 500.');
+    igual(tm.slice(im, im + 2), ['Contado: $ 51.500. Sobran $ 500.', 'Billetes: $ 51.000'], 'si el contado a mano difiere de los billetes, se ven los dos');
+    igual(textoCierre(Object.assign({}, c, { efectivoContado: 51000, billetes: {} }), 'Club').includes('Billetes:'), false, 'contado a mano sin billetes: no muestra billetes');
     igual(nuevaCaja({ condicion: 'local', botones: [], ahora: hora(15, 0) }).billetes, {}, 'una caja nueva arranca sin billetes');
 
     const csv = csvDetalle(c);

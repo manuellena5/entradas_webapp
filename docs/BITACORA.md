@@ -275,3 +275,29 @@ Con Chrome sin interfaz, emulando un teléfono táctil de 390 × 844: **36 compr
 - El dato interno sigue llamándose `fondo`; no se ve en pantalla.
 - `APP_VERSION` v9 / `CACHE_NAME` entradas-v9.
 - Probado: `tests.html` 96 en verde (el texto compartido dice "Caja inicial: $ 20.000"); de punta a punta W2 (58), W3 (36, con la fila "Caja inicial" del cierre), W4 (66), W5 (51) y atrás/instalar (15), todo bien.
+
+## Pedido de M: efectivo contado y billetes juntos, Configurar con la caja abierta, app normal (07/10/2026, v10)
+
+### Qué se hizo
+
+- **Efectivo contado vuelve, y convive con Contar billetes.**
+  - En Cierre de caja está primero "Contar billetes" (la tabla, con "Total en billetes") y debajo el campo **Efectivo contado**.
+  - Al cargar billetes, el campo se completa con su total. Se puede cambiar a mano (por ejemplo, para sumar monedas), y vale lo último que se tocó.
+  - La comparación con "Tiene que haber" usa siempre el campo.
+  - El texto compartido trae "Contado: $ x" y, si hay billetes, "Billetes: $ y" con el detalle; así se ve si se agregó algo a mano.
+- **Configurar con la caja abierta.** Botón "Configurar" arriba en Cierre de caja; "Listo" vuelve a Cierre.
+  - Avisa "Con la caja abierta no se pueden cambiar los precios ni agregar botones."
+  - En cada botón, el precio (y el de socios) se ve como dato fijo, sin campo para editarlo.
+  - Lo demás se cambia: nombre, modo de ticket, título, si se muestra para vender, socios, datos para transferir. Va a la configuración (para las cajas siguientes) y a la copia de botones de la caja (vale enseguida para vender). Los precios de la caja no se tocan nunca.
+  - Con la caja cerrada, Configurar sigue igual que antes (todo).
+- **Cierre con nombres cambiados:** una fila por botón, con su nombre actual. Antes tomaba el nombre de la primera venta; con nombres editables en medio de la caja, eso podía confundir.
+- **Sin pantalla completa:** `manifest.json` pasó de `fullscreen` a `standalone`, así se ve como una app normal, con la barra del teléfono (hora, batería) arriba. Chrome sigue diciendo que es instalable. Una app ya instalada puede tardar en tomar el cambio; si no lo toma, hay que desinstalarla y volver a instalarla.
+- `ESPECIFICACION.md` (secciones 9 y 10) en los dos repos, y `PLAN.md` (forma de datos y W5).
+- `APP_VERSION` v10 / `CACHE_NAME` entradas-v10.
+
+### Qué se probó
+
+- `tests.html`: **98 en verde**. Incluye el texto compartido con contado a mano distinto de los billetes, y el contado a mano sin billetes.
+- W4 de punta a punta, escribiendo con el teclado: **72 bien.** Billetes llenan el campo; a mano $ 51.500 → "Sobran $ 500." con los billetes en $ 51.000; cambiar un billete vuelve a tomar el total; campo vacío sin comparación; solo el campo, sin billetes, compara igual.
+- W5 de punta a punta: **62 bien.** Configurar desde Cierre con la caja abierta; sin campos de precio y sin "Agregar"; forzar un cambio de precio no lo cambia. Nombre "Caballero", ticket por persona, título y Menor oculto: se ven enseguida en Vender, la venta sale con el modo y título nuevos al mismo precio, y el cierre junta las ventas en "Caballeros". Los cambios quedan para la caja siguiente.
+- W2 (58), W3 (36) y atrás/instalar (15): bien. Instalable con `standalone`: sí.

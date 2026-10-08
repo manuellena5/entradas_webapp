@@ -97,7 +97,8 @@ caja = { id, abiertaEn, cerradaEn, condicion, rival, fondo, efectivoContado, bil
                     tickets: [{ numero, clase, titulo, detalle, cuerpo: [{ texto, monto }], total }] }] }
 ```
 
-- `billetes`: cuántos hay de cada uno, por ejemplo `{ 20000: 2, 500: 1 }`; `efectivoContado` es su suma, o `null` si no se cargó ninguno.
+- `billetes`: cuántos hay de cada uno, por ejemplo `{ 20000: 2, 500: 1 }`. `efectivoContado`: lo que dice el campo Efectivo contado (toma la suma de billetes al cambiar un billete, o lo que se escriba a mano); `null` si está vacío.
+- `botones` de la caja: copia de la configuración al abrir. Con la caja abierta se le pasan los cambios de Configurar (nombre, ticket, título, si se muestra), nunca los precios.
 - `condicion`: `local` o `visitante`. `medio`: `efectivo`, `transferencia` o `sin_cargo`. `clase`: `combinado` o `individual`.
 - `numero` es un entero; se muestra con cuatro cifras. `total` del ticket: en el combinado, la suma; en el individual, el precio unitario.
 
@@ -177,7 +178,7 @@ Tareas:
 - Agregar y ocultar botones. Sin borrar.
 - Interruptor de socios y selector Socio / No socio en Vender (sección 11).
 - Datos para transferir.
-- Configurar solo se abre con la caja cerrada.
+- Configurar se abre con la caja cerrada (todo) y, después de un pedido de M, también con la caja abierta desde Cierre (sin precios ni botones nuevos).
 
 **Listo cuando:** pasan los casos 6 a 11 de la especificación hechos a mano.
 

@@ -223,13 +223,18 @@ Informe con forma de ticket. Todo sale de las ventas **no anuladas**, usando la 
 | Ventas anuladas | Cantidad y monto. |
 
 - Un botón oculto que tuvo ventas en esta caja igual aparece.
+- Una fila por botón, con su nombre actual. Si se le cambió el nombre con la caja abierta, todas sus ventas suman en esa fila.
 - En las filas, el nombre del botón va en plural (Hombres, Mujeres, Jugadores).
-- **Efectivo contado:** se cuentan los billetes de $ 20.000, $ 10.000, $ 2.000, $ 1.000, $ 500, $ 200 y $ 100: para cada uno se pone cuántos hay, se ve el subtotal y abajo el total contado. Ese total se compara con "Tiene que haber" y muestra "Coincide con lo esperado.", "Sobran $ x." o "Faltan $ x." Mientras no se cargue ningún billete, no se muestra la comparación. El cierre compartido trae el total contado y los billetes cargados.
+- **Contar billetes:** los de $ 20.000, $ 10.000, $ 2.000, $ 1.000, $ 500, $ 200 y $ 100. Para cada uno se pone cuántos hay, se ve el subtotal y abajo el total en billetes. Es una ayuda: su total pasa al campo Efectivo contado.
+- **Efectivo contado:** campo con lo que se contó. Se completa solo con el total de billetes y se puede cambiar a mano (por ejemplo, para sumar monedas). Vale lo último que se tocó: si después se cambia un billete, el campo vuelve a tomar el total de billetes. Se compara con "Tiene que haber" y muestra "Coincide con lo esperado.", "Sobran $ x." o "Faltan $ x." Vacío, no se muestra la comparación.
+- El cierre compartido trae el efectivo contado y, si se cargaron billetes, su total y el detalle.
 - Botones: "Imprimir cierre" y "Cerrar caja".
 
 ## 10. Configurar
 
-Solo con la caja cerrada.
+Con la caja cerrada se entra desde Abrir caja y se cambia todo.
+
+Con la caja abierta se entra desde Cierre de caja (botón "Configurar" arriba). Se ve todo y se puede cambiar todo **menos los precios** (el precio y el de socios se ven pero no se editan), y no se agregan botones (un botón nuevo necesita precio). Lo que se cambia vale enseguida para vender y queda para las cajas siguientes.
 
 - **Botones**, agrupados en "Entradas", "Solo cuando se juega de local" y "No pagan entrada". En cada grupo se puede agregar uno nuevo.
 - Al tocar un botón se edita: nombre, precio, precio para socios (si está activado y es del grupo `entrada`), modo de ticket, título del ticket (solo si imprime) y si se muestra para vender.

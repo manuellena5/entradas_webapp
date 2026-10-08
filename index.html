@@ -295,6 +295,8 @@ html { touch-action: manipulation; }
 .b-modo { height: 64px; padding: 0 6px; border-radius: 12px; font-size: 16px; font-weight: 700; line-height: 1.15; }
 .b-listo { height: 68px; background: var(--tinta); font-size: 32px; }
 .selector-socio { padding: 10px 12px 0; gap: 8px; }
+.nota-config { margin-top: 8px; }
+.precio-fijo .condensada { font-size: 30px; }
 .b-socio { height: 48px; border-radius: 12px; font-size: 18px; font-weight: 700; }
 .z-m4 { width: 130px; text-align: right; }
 
@@ -606,7 +608,7 @@ function calcularCierre(caja, botones) {
     const a = acum[b.id];
     if (!a && !b.visible) return;                       // oculto y sin ventas: no aparece
     if (!a && b.grupo === 'extra' && !local) return;    // de visitante no hay extras
-    filas[b.grupo].push(fila(a ? a.nombre : b.nombre, a));
+    filas[b.grupo].push(fila(b.nombre, a));   // una fila por botón, con su nombre actual
   });
   Object.keys(acum).forEach((id) => {
     if (!vistos[id]) filas[acum[id].grupo].push(fila(acum[id].nombre, acum[id]));
@@ -675,6 +677,7 @@ function textoCierre(caja, club) {
   l.push('Tiene que haber: ' + plata(z.esperado));
   if (caja.efectivoContado !== null && caja.efectivoContado !== undefined) {
     l.push('Contado: ' + plata(caja.efectivoContado) + '. ' + arqueo(caja.efectivoContado, z.esperado).texto);
+    if (hayBilletes(caja.billetes)) l.push('Billetes: ' + plata(sumarBilletes(caja.billetes)));
     BILLETES.filter((v) => Number((caja.billetes || {})[v]) > 0).forEach((v) => {
       const n = Number(caja.billetes[v]);
       l.push('  ' + plata(v) + ' x ' + n + ' = ' + plata(v * n));
@@ -770,7 +773,7 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v9';
+const APP_VERSION = 'v10';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
@@ -1039,7 +1042,7 @@ function contarBilletes(c) {
         <span class="billete-sub" id="bs-${v}">${n ? plata(v * n) : ''}</span>
       </div>`;
     }).join('')}
-    <div class="billetes-total"><span>Total contado</span><span class="condensada" id="total-contado">${plata(sumarBilletes(b))}</span></div>
+    <div class="billetes-total"><span>Total en billetes</span><span class="condensada" id="total-contado">${plata(sumarBilletes(b))}</span></div>
   </div>`;
 }
 
@@ -1057,13 +1060,18 @@ function mensajeHtml() {
 function pantallaCierre() {
   return `
   <div class="pantalla">
-    ${barraSimple('Cierre de caja', condicionTxt(caja.condicion))}
+    ${barraVolver('Cierre de caja', 'ir', 'config', 'Configurar')}
     <div class="desplaza cierre">
       ${papelCierre(caja)}
       <div class="campo">
-        <div class="etiqueta">Efectivo contado</div>
-        <div class="ayuda">Poné cuántos billetes hay de cada uno.</div>
+        <div class="etiqueta">Contar billetes</div>
+        <div class="ayuda">Poné cuántos hay de cada uno. El total pasa a Efectivo contado.</div>
         ${contarBilletes(caja)}
+      </div>
+      <div class="campo">
+        <label for="contado">Efectivo contado</label>
+        <input id="contado" type="text" inputmode="numeric" data-campo="contado" value="${caja.efectivoContado === null || caja.efectivoContado === undefined ? '' : caja.efectivoContado}" placeholder="0" autocomplete="off">
+        <div class="ayuda">Si hay monedas u otra plata, cambialo a mano.</div>
         <div class="arqueo" id="arqueo">${arqueoHtml(caja)}</div>
       </div>
       ${mensajeHtml()}
@@ -1129,12 +1137,13 @@ function pantallaConfig() {
   </div>`;
   return `
   <div class="pantalla">
-    ${barraVolver('Configurar', 'ir', 'abrir', 'Listo')}
+    ${barraVolver('Configurar', 'ir', caja ? 'cierre' : 'abrir', 'Listo')}
     <div class="desplaza config">
+      ${caja ? '<div class="nota nota-config">Con la caja abierta no se pueden cambiar los precios ni agregar botones.</div>' : ''}
       ${SECCIONES.map((sec) => `
         <div class="rotulo seccion">${sec.titulo}</div>
         ${ordenarBotones(config.botones).filter((b) => b.grupo === sec.grupo).map(filaConfig).join('')}
-        <button type="button" class="b-agregar" data-accion="agregar" data-valor="${sec.grupo}">${sec.agregar}</button>`).join('')}
+        ${caja ? '' : `<button type="button" class="b-agregar" data-accion="agregar" data-valor="${sec.grupo}">${sec.agregar}</button>`}`).join('')}
       <div class="rotulo seccion">Socios</div>
       <button type="button" class="fila-config" data-accion="socios" aria-pressed="${config.sociosActivo}">
         <span class="fc-nombre fc-chico">Precio distinto para socios</span>${siNo(config.sociosActivo)}
@@ -1162,14 +1171,18 @@ function panelEditar() {
         <label for="b-nombre">Nombre del botón</label>
         <input id="b-nombre" type="text" data-campo="b-nombre" value="${esc(b.nombre)}" autocomplete="off">
       </div>
-      ${b.grupo !== 'gratis' ? `<div class="campo">
+      ${b.grupo !== 'gratis' && !caja ? `<div class="campo">
         <label for="b-precio">Precio</label>
         <input id="b-precio" type="text" inputmode="numeric" data-campo="b-precio" value="${b.precio}" autocomplete="off">
       </div>` : ''}
-      ${config.sociosActivo && b.grupo === 'entrada' ? `<div class="campo">
+      ${config.sociosActivo && b.grupo === 'entrada' && !caja ? `<div class="campo">
         <label for="b-socio">Precio para socios</label>
         <input id="b-socio" type="text" inputmode="numeric" data-campo="b-socio" value="${b.precioSocio}" autocomplete="off">
       </div>` : ''}
+      ${b.grupo !== 'gratis' && caja ? `<div class="renglon-gris precio-fijo">
+        <span>Precio${config.sociosActivo && b.grupo === 'entrada' ? ' · Socios ' + plata(b.precioSocio) : ''}</span><span class="condensada">${plata(b.precio)}</span>
+      </div>
+      <div class="ayuda">Con la caja abierta el precio no se cambia.</div>` : ''}
       <div class="campo">
         <div class="etiqueta etiqueta-panel">Ticket</div>
         <div class="tres">${modo('persona', 'Uno por persona')}${modo('venta', 'Uno por venta')}${modo('no', 'No imprime')}</div>
@@ -1302,7 +1315,7 @@ const desplazado = {};
 function render() {
   const antes = app.querySelector('.desplaza');
   if (antes) desplazado[antes.dataset.pantalla] = antes.scrollTop;
-  const conCaja = ['vender', 'ventas', 'cierre'];
+  const conCaja = ['vender', 'ventas', 'cierre', 'config'];
   const sinCaja = ['abrir', 'cajas', 'vieja', 'config'];
   let pantalla = ui.pantalla;
   if (caja && conCaja.indexOf(pantalla) < 0) pantalla = 'vender';
@@ -1316,7 +1329,7 @@ function render() {
   if (caja && ui.cobrada) html += panelCobrado();
   else if (caja && ui.cerrando) html += panelCerrar();
   else if (caja && ui.alias && pantalla === 'vender') html += panelAlias();
-  else if (!caja && pantalla === 'config' && ui.editar) html += panelEditar();
+  else if (pantalla === 'config' && ui.editar) html += panelEditar();
   app.innerHTML = html;
   const ahoraZona = app.querySelector('.desplaza');
   if (ahoraZona) {
@@ -1405,6 +1418,7 @@ const acciones = {
   socio(v) { ui.socio = v === 'si'; },
   editar(id) { ui.editar = id; ui.error = ''; },
   agregar(grupo) {
+    if (caja) return;
     const b = botonNuevo(config.botones, grupo, 'b' + Date.now().toString(36));
     config.botones.push(b);
     guardarConfig();
@@ -1495,14 +1509,28 @@ async function copiar(texto) {
 
 function botonEditado() { return config.botones.find((b) => b.id === ui.editar); }
 
+// Con la caja abierta, lo que se cambia (nombre, ticket, título, si se muestra) también va a
+// la copia de botones de la caja, para que se vea al vender. Los precios no se tocan.
+function pasarACaja() {
+  const nueva = Object.assign({}, caja, {
+    botones: caja.botones.map((b) => {
+      const c = config.botones.find((x) => x.id === b.id);
+      return c ? Object.assign({}, b, { nombre: c.nombre, ticket: c.ticket, titulo: c.titulo, visible: c.visible }) : b;
+    })
+  });
+  if (!G.guardarCaja(nueva)) return false;
+  caja = nueva;
+  return true;
+}
+
 function guardarConfig() {
-  const ok = G.guardarConfig(config);
+  let ok = G.guardarConfig(config);
+  if (ok && caja) ok = pasarACaja();
   const el = document.getElementById('error-config');
   if (el) el.hidden = ok;
   return ok;
 }
 
-// Con la caja abierta no se puede configurar, así que el interruptor no cambia en medio de una caja.
 function esSocio() { return config.sociosActivo && ui.socio; }
 
 function actualizarArqueo() {
@@ -1527,6 +1555,7 @@ app.addEventListener('input', (e) => {
       const t = document.getElementById('titulo-editar');
       if (t) t.textContent = v || 'Botón';
     }
+    if ((campo === 'b-precio' || campo === 'b-socio') && caja) return; // con la caja abierta, los precios no se cambian
     if (campo === 'b-precio') {
       const nuevo = soloNumero(v);
       if (b.precioSocio === b.precio) b.precioSocio = nuevo; // el de socios acompaña mientras sea igual
@@ -1536,17 +1565,25 @@ app.addEventListener('input', (e) => {
     if (campo === 'b-titulo') b.titulo = v.toUpperCase();
     guardarConfig();
   }
+  // Contar billetes completa Efectivo contado con su total. Si después se escribe
+  // otro número en Efectivo contado (monedas, etc.), vale ese: gana lo último que se tocó.
   if (campo === 'billete' && caja) {
     const v = Number(e.target.dataset.billete);
     const n = soloNumero(e.target.value);
     const billetes = Object.assign({}, caja.billetes);
     if (n > 0) billetes[v] = n; else delete billetes[v];
     const total = sumarBilletes(billetes);
-    // Sin ningún billete cargado no hay contado (todavía no se contó).
     const nueva = Object.assign({}, caja, { billetes, efectivoContado: hayBilletes(billetes) ? total : null });
     if (G.guardarCaja(nueva)) caja = nueva;
     document.getElementById('bs-' + v).textContent = n ? plata(v * n) : '';
     document.getElementById('total-contado').textContent = plata(total);
+    document.getElementById('contado').value = caja.efectivoContado === null ? '' : caja.efectivoContado;
+    actualizarArqueo();
+  }
+  if (campo === 'contado' && caja) {
+    const txt = e.target.value.replace(/\D/g, '');
+    const nueva = Object.assign({}, caja, { efectivoContado: txt === '' ? null : Number(txt) });
+    if (G.guardarCaja(nueva)) caja = nueva;
     actualizarArqueo();
   }
   if (campo === 'pagador' && caja) {
