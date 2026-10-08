@@ -294,6 +294,10 @@ html { touch-action: manipulation; }
 .etiqueta-panel { font-size: 16px; }
 .b-modo { height: 64px; padding: 0 6px; border-radius: 12px; font-size: 16px; font-weight: 700; line-height: 1.15; }
 .b-listo { height: 68px; background: var(--tinta); font-size: 32px; }
+.b-borrar { height: 68px; background: var(--rojo); font-size: 32px; }
+.ayuda-config { padding: 10px 4px 0; }
+.fila-config { transition: background-color 0.6s; }
+.fila-config.apretando { background: var(--panel); }
 .selector-socio { padding: 10px 12px 0; gap: 8px; }
 .nota-config { margin-top: 8px; }
 .precio-fijo .condensada { font-size: 30px; }
@@ -773,7 +777,7 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v10';
+const APP_VERSION = 'v11';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
@@ -796,6 +800,9 @@ const ui = {
   mensaje: '',
   socio: false,        // la venta en curso es de socio (vuelve a "No socio" al cobrar)
   editar: null,        // id del botón que se está cambiando en Configurar
+  editarAntes: null,   // cómo estaba ese botón al abrir el panel, para "Cancelar"
+  editarNuevo: false,  // el botón se acaba de agregar: "Cancelar" no lo crea
+  borrar: null,        // id del botón que pregunta "¿Borrar?"
   error: ''
 };
 
@@ -1139,7 +1146,8 @@ function pantallaConfig() {
   <div class="pantalla">
     ${barraVolver('Configurar', 'ir', caja ? 'cierre' : 'abrir', 'Listo')}
     <div class="desplaza config">
-      ${caja ? '<div class="nota nota-config">Con la caja abierta no se pueden cambiar los precios ni agregar botones.</div>' : ''}
+      ${caja ? '<div class="nota nota-config">Con la caja abierta no se pueden cambiar los precios ni agregar o borrar botones.</div>'
+        : '<div class="ayuda ayuda-config">Tocá un botón para cambiarlo. Mantenelo apretado para borrarlo.</div>'}
       ${SECCIONES.map((sec) => `
         <div class="rotulo seccion">${sec.titulo}</div>
         ${ordenarBotones(config.botones).filter((b) => b.grupo === sec.grupo).map(filaConfig).join('')}
@@ -1155,6 +1163,21 @@ function pantallaConfig() {
         ${campo('t-banco', 'Banco o billetera', t.banco)}
       </div>
       <div class="error" id="error-config" hidden>No se pudo guardar. Probá de nuevo.</div>
+    </div>
+  </div>`;
+}
+
+function panelBorrar() {
+  const b = config.botones.find((x) => x.id === ui.borrar);
+  if (!b) return '';
+  return `
+  <div class="velo" style="z-index: 6">
+    <div class="panel">
+      <div class="panel-titulo">¿Borrar ${esc(b.nombre)}?</div>
+      <div class="texto-panel">Deja de aparecer para vender y en Configurar. Las cajas cerradas no cambian.</div>
+      ${ui.error ? `<div class="error">${esc(ui.error)}</div>` : ''}
+      <button type="button" class="boton-grande b-borrar" data-accion="borrarBoton">Borrar</button>
+      <button type="button" class="b-chico b-ancho" data-accion="noBorrar">Cancelar</button>
     </div>
   </div>`;
 }
@@ -1197,6 +1220,7 @@ function panelEditar() {
       </button>
       ${ui.error ? `<div class="error">${esc(ui.error)}</div>` : ''}
       <button type="button" class="boton-grande b-listo" data-accion="listoEditar">Listo</button>
+      <button type="button" class="b-chico b-ancho" data-accion="cancelarEditar">Cancelar</button>
     </div>
   </div>`;
 }
@@ -1329,6 +1353,7 @@ function render() {
   if (caja && ui.cobrada) html += panelCobrado();
   else if (caja && ui.cerrando) html += panelCerrar();
   else if (caja && ui.alias && pantalla === 'vender') html += panelAlias();
+  else if (pantalla === 'config' && ui.borrar) html += panelBorrar();
   else if (pantalla === 'config' && ui.editar) html += panelEditar();
   app.innerHTML = html;
   const ahoraZona = app.querySelector('.desplaza');
@@ -1416,15 +1441,41 @@ const acciones = {
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   },
   socio(v) { ui.socio = v === 'si'; },
-  editar(id) { ui.editar = id; ui.error = ''; },
+  editar(id) {
+    ui.editar = id;
+    ui.editarAntes = JSON.parse(JSON.stringify(botonEditado()));
+    ui.editarNuevo = false;
+    ui.error = '';
+  },
   agregar(grupo) {
     if (caja) return;
     const b = botonNuevo(config.botones, grupo, 'b' + Date.now().toString(36));
     config.botones.push(b);
     guardarConfig();
     ui.editar = b.id;
+    ui.editarAntes = null;
+    ui.editarNuevo = true;
     ui.error = '';
   },
+  // Deja el botón como estaba al abrir el panel; si era nuevo, no lo crea.
+  cancelarEditar() {
+    const i = config.botones.findIndex((b) => b.id === ui.editar);
+    if (i >= 0) {
+      if (ui.editarNuevo) config.botones.splice(i, 1);
+      else if (ui.editarAntes) config.botones[i] = ui.editarAntes;
+      guardarConfig();
+    }
+    Object.assign(ui, { editar: null, editarAntes: null, editarNuevo: false, error: '' });
+  },
+  borrarBoton() {
+    if (caja) return;
+    const antes = config.botones;
+    config.botones = antes.filter((b) => b.id !== ui.borrar);
+    if (!guardarConfig()) { config.botones = antes; ui.error = 'No se pudo borrar. Probá de nuevo.'; return; }
+    ui.borrar = null;
+    ui.error = '';
+  },
+  noBorrar() { ui.borrar = null; ui.error = ''; },
   modo(m) { botonEditado().ticket = m; guardarConfig(); },
   visible() { const b = botonEditado(); b.visible = !b.visible; guardarConfig(); },
   socios() { config.sociosActivo = !config.sociosActivo; guardarConfig(); },
@@ -1435,8 +1486,7 @@ const acciones = {
     if (!b.nombre) { ui.error = 'Poné un nombre.'; return; }
     if (b.ticket !== 'no' && !b.titulo) { ui.error = 'Poné el título del ticket.'; return; }
     if (!guardarConfig()) { ui.error = 'No se pudo guardar. Probá de nuevo.'; return; }
-    ui.editar = null;
-    ui.error = '';
+    Object.assign(ui, { editar: null, editarAntes: null, editarNuevo: false, error: '' });
   },
   async instalar() {
     const pedido = pedidoInstalar;
@@ -1477,6 +1527,8 @@ const acciones = {
 };
 
 app.addEventListener('click', (e) => {
+  // Al soltar después de mantener apretado no se toca nada (podría caer en "Borrar").
+  if (ignorarClic) return;
   const el = e.target.closest('[data-accion]');
   if (!el || el.disabled) return;
   // Bloquear los botones de cobrar apenas se tocan, antes de cualquier otra cosa.
@@ -1632,6 +1684,56 @@ window.addEventListener('appinstalled', () => {
   if (sinEscribir()) render();
 });
 
+// ---------- Mantener apretado para borrar (Configurar, con la caja cerrada) ----------
+let ignorarClic = false;
+let soltarIgnora = false;   // el dedo que mantuvo apretado todavía no se levantó
+let apretado = null;
+let tiempoApretar = null;
+let inicioApretar = null;
+function soltar() {
+  clearTimeout(tiempoApretar);
+  tiempoApretar = null;
+  if (apretado) apretado.classList.remove('apretando');
+  apretado = null;
+}
+app.addEventListener('pointerdown', (e) => {
+  const fila = e.target.closest('.fila-config[data-accion="editar"]');
+  if (!fila || caja) return;
+  apretado = fila;
+  inicioApretar = { x: e.clientX, y: e.clientY };
+  fila.classList.add('apretando');
+  tiempoApretar = setTimeout(() => {
+    const id = fila.dataset.valor;
+    soltar();
+    soltarIgnora = true;
+    if (navigator.vibrate) navigator.vibrate(30);
+    Object.assign(ui, { borrar: id, error: '' });
+    render();
+  }, 800);
+});
+['pointerup', 'pointercancel'].forEach((t) => app.addEventListener(t, soltar));
+// Al levantar ese dedo se ignora solo el toque que genera (llega enseguida), no los siguientes.
+document.addEventListener('pointerup', () => {
+  if (!soltarIgnora) return;
+  soltarIgnora = false;
+  ignorarClic = true;
+  setTimeout(() => { ignorarClic = false; }, 0);
+}, true);
+app.addEventListener('pointermove', (e) => {
+  if (apretado && Math.hypot(e.clientX - inicioApretar.x, e.clientY - inicioApretar.y) > 10) soltar();
+});
+app.addEventListener('contextmenu', (e) => { if (e.target.closest('.fila-config')) e.preventDefault(); });
+
+// "Atrás" con un panel abierto lo cierra, sin salir ni avisar.
+function cerrarPanel() {
+  if (ui.borrar) { acciones.noBorrar(); return true; }
+  if (ui.editar) { acciones.cancelarEditar(); return true; }
+  if (ui.cobrada) { acciones.siguiente(); return true; }
+  if (ui.cerrando) { acciones.noCerrar(); return true; }
+  if (ui.alias) { acciones.cerrarAlias(); return true; }
+  return false;
+}
+
 // ---------- Atrás dos veces para salir ----------
 // Se agrega un paso al historial: el primer "atrás" lo consume y avisa. Si se toca
 // atrás otra vez mientras se ve el aviso, no queda nada que consumir y el teléfono cierra la app.
@@ -1648,6 +1750,11 @@ function ponerTrampa() {
 document.addEventListener('pointerdown', () => { if (!tiempoSalir) ponerTrampa(); }, true);
 window.addEventListener('popstate', () => {
   trampa = false;
+  if (cerrarPanel()) {
+    render();
+    ponerTrampa();
+    return;
+  }
   avisoSalir.hidden = false;
   clearTimeout(tiempoSalir);
   tiempoSalir = setTimeout(() => {

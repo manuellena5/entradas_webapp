@@ -108,8 +108,9 @@ El contador sobre el botón usa el color del texto como fondo, y tinta o blanco 
 4. **Alias** (panel). Alias en 44 px para que se lea a un metro.
 5. **Ventas.** Tarjetas blancas, una por venta. Las anuladas en gris, tachadas.
 6. **Cierre.** El informe con aspecto de papel, campo de efectivo contado, "Imprimir cierre" y "Cerrar caja".
-7. **Configurar.** Lista por grupos con "Cambiar" a la derecha de cada fila y un botón de borde punteado para agregar. Después, Socios y Datos para transferir.
-8. **Cambiar un botón** (panel). Nombre, precio, modo de ticket con su explicación debajo, título del ticket, "Se muestra para vender", "Listo".
+7. **Configurar.** Arriba, "Tocá un botón para cambiarlo. Mantenelo apretado para borrarlo." Lista por grupos con "Cambiar" a la derecha de cada fila y un botón de borde punteado para agregar. Mientras se mantiene apretada, la fila se oscurece de a poco. Después, Socios y Datos para transferir.
+8. **Cambiar un botón** (panel). Nombre, precio, modo de ticket con su explicación debajo, título del ticket, "Se muestra para vender", "Listo" y debajo "Cancelar".
+9. **¿Borrar?** (panel). "¿Borrar {nombre}?", qué pasa, botón rojo "Borrar" y "Cancelar".
 
 ## Textos de referencia
 

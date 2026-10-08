@@ -301,3 +301,40 @@ Con Chrome sin interfaz, emulando un teléfono táctil de 390 × 844: **36 compr
 - W4 de punta a punta, escribiendo con el teclado: **72 bien.** Billetes llenan el campo; a mano $ 51.500 → "Sobran $ 500." con los billetes en $ 51.000; cambiar un billete vuelve a tomar el total; campo vacío sin comparación; solo el campo, sin billetes, compara igual.
 - W5 de punta a punta: **62 bien.** Configurar desde Cierre con la caja abierta; sin campos de precio y sin "Agregar"; forzar un cambio de precio no lo cambia. Nombre "Caballero", ticket por persona, título y Menor oculto: se ven enseguida en Vender, la venta sale con el modo y título nuevos al mismo precio, y el cierre junta las ventas en "Caballeros". Los cambios quedan para la caja siguiente.
 - W2 (58), W3 (36) y atrás/instalar (15): bien. Instalable con `standalone`: sí.
+
+## Pedido de M: borrar botones, Cancelar y atrás en los paneles (08/10/2026, v11)
+
+### Qué se hizo
+
+- **Borrar manteniendo apretado** (Configurar, con la caja cerrada).
+  - Mantener apretada una fila unos 0,8 segundos (se oscurece mientras tanto) abre "¿Borrar {nombre}?" con "Borrar" en rojo y "Cancelar". Un toque corto la sigue abriendo para cambiarla.
+  - Si el dedo se mueve para bajar la lista, no pregunta nada.
+  - El toque que se genera al soltar el dedo se ignora, para que no caiga sin querer sobre "Borrar". El primer arreglo usaba una ventana de tiempo que también frenaba toques rápidos a propósito; se cambió para ignorar solo ese toque.
+  - Borrar saca el botón de la configuración (Configurar, Precios de hoy, Vender). Las cajas cerradas no cambian, porque guardan su propia copia.
+  - Con la caja abierta no se borra (se puede ocultar). El aviso de arriba lo dice.
+  - Arriba de Configurar: "Tocá un botón para cambiarlo. Mantenelo apretado para borrarlo."
+  - Cambia la regla anterior "no se borran botones": M lo pidió.
+- **Cancelar en el panel de un botón**, debajo de Listo. En uno recién agregado, no lo crea. En uno existente, lo deja como estaba al abrir el panel (nombre, precio, ticket, título, si se muestra).
+- **"Atrás" con un panel abierto lo cierra**, sin salir ni mostrar el aviso de salir:
+  - Cambiar un botón y ¿Borrar?: como Cancelar.
+  - Cobrado: como Siguiente (la venta ya estaba guardada).
+  - Alias y ¿Cerrar la caja?: los cierra sin hacer nada.
+  - Sin panel, sigue el "atrás dos veces para salir".
+- `ESPECIFICACION.md` (secciones 8 y 10) y `DISENO.md` (pantallas 7 a 9), en los dos repos.
+- `APP_VERSION` v11 / `CACHE_NAME` entradas-v11.
+
+### Qué se probó
+
+Con Chrome sin interfaz, emulando un teléfono táctil: **26 comprobaciones nuevas, todas bien.**
+
+- Cancelar y "atrás" en un botón nuevo: no se crea. El "atrás" siguiente, ya sin panel, avisa para salir.
+- Cancelar y "atrás" en uno existente: vuelve a como estaba, aunque se haya cambiado el nombre, el precio y el ticket.
+- Toque corto abre para cambiar. Apretar poco no pregunta. Mantener apretado con el dedo en movimiento no pregunta. Mantener apretado pregunta, y al soltar no se abre nada más.
+- Cancelar y "atrás" en ¿Borrar? no borran. Borrar saca a Mujer de Configurar, de lo guardado, de Precios de hoy y de Vender.
+- "Atrás" en Alias, en Cobrado (sigue a vender con la venta guardada y se puede volver a cobrar) y en ¿Cerrar la caja? (no cierra).
+- Con la caja abierta no se puede borrar. Una caja cerrada con ventas de Tribuna sigue mostrando "Tribunas" después de borrar Tribuna.
+- Se volvieron a correr W2 (58), W3 (36), W4 (72), W5 (62) y atrás/instalar (15): todo bien.
+
+### Falta
+
+- Probar en el teléfono el "mantener apretado" con el dedo (que no salte el menú del sistema ni se seleccione texto) y el "atrás" de Android con los paneles.

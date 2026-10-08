@@ -205,7 +205,8 @@ La app **no verifica** transferencias. Se anotan y se concilian después contra 
 
 ### Salir
 
-- El botón "atrás" del teléfono no cierra la app de un toque: el primero muestra "Tocá atrás otra vez para salir." y, si se toca de nuevo mientras se ve ese aviso, la app se cierra. Lo que estaba en pantalla no cambia.
+- Con un panel abierto, "atrás" lo cierra: en Cambiar un botón y en ¿Borrar? es como Cancelar; en Cobrado es como Siguiente (la venta ya está guardada); en Alias y en ¿Cerrar la caja? lo cierra sin hacer nada.
+- Sin panel abierto, el botón "atrás" del teléfono no cierra la app de un toque: el primero muestra "Tocá atrás otra vez para salir." y, si se toca de nuevo mientras se ve ese aviso, la app se cierra. Lo que estaba en pantalla no cambia.
 
 ## 9. Cierre de caja
 
@@ -238,7 +239,8 @@ Con la caja abierta se entra desde Cierre de caja (botón "Configurar" arriba). 
 
 - **Botones**, agrupados en "Entradas", "Solo cuando se juega de local" y "No pagan entrada". En cada grupo se puede agregar uno nuevo.
 - Al tocar un botón se edita: nombre, precio, precio para socios (si está activado y es del grupo `entrada`), modo de ticket, título del ticket (solo si imprime) y si se muestra para vender.
-- **No se borran botones.** Se ocultan, para no perder el historial.
+- **Borrar:** con la caja cerrada, manteniendo apretado un botón aparece "¿Borrar {nombre}?" con Borrar y Cancelar. Un toque corto lo abre para cambiarlo. Borrar lo saca de Configurar y de la venta; las cajas cerradas no cambian, porque guardan su propia copia. Con la caja abierta no se borra (se puede ocultar).
+- El panel de un botón tiene **Listo** y **Cancelar**. Cancelar deja el botón como estaba al abrir el panel; si era uno recién agregado, no se crea.
 - **Socios:** interruptor "Precio distinto para socios". Ver sección 11.
 - **Datos para transferir:** alias, a nombre de, banco o billetera.
 
