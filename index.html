@@ -670,7 +670,7 @@ function textoCierre(caja, club) {
   l.push('Transferencia: ' + plata(z.transferencia));
   l.push('*TOTAL: ' + plata(z.total) + '*');
   l.push('', '*Efectivo en caja*');
-  l.push('Para vuelto: ' + plata(z.fondo));
+  l.push('Caja inicial: ' + plata(z.fondo));
   l.push('Ventas: ' + plata(z.efectivo));
   l.push('Tiene que haber: ' + plata(z.esperado));
   if (caja.efectivoContado !== null && caja.efectivoContado !== undefined) {
@@ -770,7 +770,7 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v8';
+const APP_VERSION = 'v9';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
@@ -831,7 +831,7 @@ function pantallaAbrir() {
       <input id="rival" type="text" data-campo="rival" value="${esc(a.rival)}" autocomplete="off">
     </div>
     <div class="campo">
-      <label for="fondo">Plata para dar vuelto</label>
+      <label for="fondo">Caja inicial</label>
       <input id="fondo" type="text" inputmode="numeric" data-campo="fondo" value="${esc(a.fondo)}" placeholder="0" autocomplete="off">
     </div>
     <div class="precios">
@@ -1013,7 +1013,7 @@ function papelCierre(c) {
     <div class="z-fila f z-total"><span class="z-n">TOTAL</span><span class="z-m4">${plata(z.total)}</span></div>
     ${corte}
     <div class="f">EFECTIVO EN CAJA</div>
-    ${plataFila('Para vuelto', plata(z.fondo))}
+    ${plataFila('Caja inicial', plata(z.fondo))}
     ${plataFila('Ventas', plata(z.efectivo))}
     ${plataFila('Tiene que haber', plata(z.esperado), 'f')}
     ${corte}

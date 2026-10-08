@@ -102,7 +102,7 @@ El contador sobre el botón usa el color del texto como fondo, y tinta o blanco 
 
 ## Pantallas
 
-1. **Abrir caja.** Club arriba en chico, título grande, Local / Visitante, rival, plata para vuelto, tarjeta con los precios del día y botón "Configurar", botón verde "Abrir caja" abajo.
+1. **Abrir caja.** Club arriba en chico, título grande, Local / Visitante, rival, caja inicial, tarjeta con los precios del día y botón "Configurar", botón verde "Abrir caja" abajo.
 2. **Vender.** Barra con el rival, Local o Visitante, botón "Alias" y cuántos ingresaron. Selector de socio si está activado. Botones en dos columnas: entradas y extras. Bajo el título "No pagan entrada", los grises van uno por fila, a lo ancho: en dos columnas el contador taparía el nombre (cambio respecto del prototipo, aprobado por M). Franja blanca con resumen y total. Efectivo y Transferencia. Pestañas.
 3. **Cobrado** (panel). Ver sección 6 de la especificación.
 4. **Alias** (panel). Alias en 44 px para que se lea a un metro.

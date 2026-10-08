@@ -193,7 +193,7 @@ La app **no verifica** transferencias. Se anotan y se concilian después contra 
 
 - Elegir **Local** o **Visitante**. De visitante se ocultan los botones del grupo `extra`.
 - Rival (opcional).
-- "Plata para dar vuelto" (opcional, entero).
+- "Caja inicial" (opcional, entero): la plata que hay en la caja al abrir, para dar vuelto.
 - Se muestran los precios del día y el acceso a Configurar.
 - Solo puede haber **una caja abierta**. Si la app se cierra o el equipo se apaga, al volver a abrirla tiene que seguir en la misma caja, en la pantalla de vender, sin perder ninguna venta. El carrito a medio cargar se puede perder.
 
@@ -219,7 +219,7 @@ Informe con forma de ticket. Todo sale de las ventas **no anuladas**, usando la 
 | SIN CARGO | Una fila por botón del grupo `gratis`: cantidad. |
 | Ingresaron en total | Cantidades del grupo `entrada` + cantidades del grupo `gratis`. |
 | COBRADO | Efectivo, Transferencia y TOTAL. Las transferencias **no** se listan una por una: pueden ser muchas y el cierre quedaría muy largo. Se ven en Ventas, con el filtro Transferencia. |
-| EFECTIVO EN CAJA | Para vuelto + Ventas en efectivo = "Tiene que haber". |
+| EFECTIVO EN CAJA | Caja inicial + Ventas en efectivo = "Tiene que haber". |
 | Ventas anuladas | Cantidad y monto. |
 
 - Un botón oculto que tuvo ventas en esta caja igual aparece.
@@ -259,7 +259,7 @@ La usan personas no técnicas. Reglas firmes:
 
 ## 13. Casos de prueba
 
-Con los botones de fábrica, de local, plata para vuelto $ 20.000. Sirven para las dos implementaciones.
+Con los botones de fábrica, de local, caja inicial $ 20.000. Sirven para las dos implementaciones.
 
 | # | Venta | Resultado esperado |
 |---|---|---|

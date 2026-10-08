@@ -1,7 +1,7 @@
 // Primero lo guardado, siempre: en la cancha la señal es mala y una red lenta
 // dejaría la app colgada. Las versiones nuevas llegan cuando cambia este archivo
 // (CACHE_NAME), se instalan por detrás y se activan cuando la persona toca el aviso.
-const CACHE_NAME = 'entradas-v8';
+const CACHE_NAME = 'entradas-v9';
 
 const ARCHIVOS = [
   './',

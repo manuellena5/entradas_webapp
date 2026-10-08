@@ -266,3 +266,12 @@ Con Chrome sin interfaz, emulando un teléfono táctil de 390 × 844: **36 compr
   - Se guarda y sigue después de recargar. El texto compartido trae los billetes. La caja cerrada los muestra en modo lectura.
 - Se volvieron a correr W2 (58), W3 (36), W5 (51) y atrás/instalar (15): todo bien.
 - Arreglo visto en la captura: los valores de los billetes salían en letra chica, porque les ganaba el estilo de las etiquetas de los campos.
+
+## Pedido de M: "Caja inicial" en lugar de "Plata para dar vuelto" (07/10/2026, v9)
+
+- Cambiado en todos los lugares donde aparece: el campo de Abrir caja, la fila del cierre (bloque EFECTIVO EN CAJA: "Caja inicial / Ventas / Tiene que haber") y el texto que se comparte por WhatsApp.
+- También en `ESPECIFICACION.md` (secciones 8, 9 y 13) y `DISENO.md` (pantalla Abrir caja), en los dos repos.
+- No se tocó el prototipo (`docs/prototipo`, solo referencia) ni lo ya escrito en esta bitácora.
+- El dato interno sigue llamándose `fondo`; no se ve en pantalla.
+- `APP_VERSION` v9 / `CACHE_NAME` entradas-v9.
+- Probado: `tests.html` 96 en verde (el texto compartido dice "Caja inicial: $ 20.000"); de punta a punta W2 (58), W3 (36, con la fila "Caja inicial" del cierre), W4 (66), W5 (51) y atrás/instalar (15), todo bien.
