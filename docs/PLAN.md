@@ -90,13 +90,14 @@ Formas:
 config = { club, sociosActivo, transf: { alias, titular, banco },
            botones: [{ id, nombre, grupo, precio, precioSocio, visible, ticket, titulo, aviso, orden }] }
 
-caja = { id, abiertaEn, cerradaEn, condicion, rival, fondo, efectivoContado, compartidoEn, ultimoTicket,
+caja = { id, abiertaEn, cerradaEn, condicion, rival, fondo, efectivoContado, billetes, compartidoEn, ultimoTicket,
          botones,   // copia de config.botones al abrir: el cierre de una caja vieja no cambia con la configuración
          ventas: [{ id, fechaHora, medio, total, socio, pagador, anuladaEn,
                     lineas:  [{ botonId, nombre, grupo, ticket, titulo, aviso, cantidad, precioUnitario, subtotal }],
                     tickets: [{ numero, clase, titulo, detalle, cuerpo: [{ texto, monto }], total }] }] }
 ```
 
+- `billetes`: cuántos hay de cada uno, por ejemplo `{ 20000: 2, 500: 1 }`; `efectivoContado` es su suma, o `null` si no se cargó ninguno.
 - `condicion`: `local` o `visitante`. `medio`: `efectivo`, `transferencia` o `sin_cargo`. `clase`: `combinado` o `individual`.
 - `numero` es un entero; se muestra con cuatro cifras. `total` del ticket: en el combinado, la suma; en el individual, el precio unitario.
 

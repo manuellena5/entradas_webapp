@@ -248,6 +248,23 @@ html { touch-action: manipulation; }
 .b-volver { flex-shrink: 0; height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--superficie); color: var(--tinta); font-size: 17px; font-weight: 700; }
 .b-caja { width: 100%; border: 0; text-align: left; color: var(--tinta); }
 .contado .condensada { font-size: 30px; }
+.billetes { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 12px; background: var(--superficie); }
+.billete-fila { display: grid; grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr); align-items: center; gap: 10px; }
+.billete-cabeza { font-size: 14px; font-weight: 600; color: var(--texto-2); }
+.billete-cabeza span:nth-child(2) { text-align: center; }
+.billete-cabeza span:last-child { text-align: right; }
+.billete-fila .billete-valor { font-family: var(--f-titulo); font-weight: 700; font-size: 26px; }
+.billete-fila input {
+  width: 100%; height: 52px; border: 2px solid var(--tinta); border-radius: 12px; background: var(--superficie);
+  color: var(--tinta); padding: 0 8px; font-size: 22px; font-weight: 600; text-align: center;
+}
+.billete-sub { text-align: right; font-size: 18px; font-weight: 600; color: var(--texto-2); }
+.billete-n { text-align: center; font-size: 18px; font-weight: 600; }
+.billetes-total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 4px; padding-top: 10px; border-top: 2px solid var(--tinta); }
+.billetes-total span:first-child { font-size: 18px; font-weight: 600; }
+.billetes-total .condensada { font-size: 34px; line-height: 1; }
+.billetes-leer { padding: 8px 14px; }
+.billetes-leer .billete-fila .billete-valor { font-size: 22px; }
 
 /* ---------- Configurar ---------- */
 .precios-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 6px; }
@@ -548,7 +565,7 @@ function nuevaCaja(op) {
   return {
     id: op.ahora, abiertaEn: op.ahora, cerradaEn: null,
     condicion: op.condicion, rival: op.rival || '', fondo: Math.max(0, Math.round(Number(op.fondo) || 0)),
-    efectivoContado: null, compartidoEn: null, ultimoTicket: 0,
+    efectivoContado: null, billetes: {}, compartidoEn: null, ultimoTicket: 0,
     botones: JSON.parse(JSON.stringify(op.botones)),
     ventas: []
   };
@@ -612,6 +629,20 @@ function calcularCierre(caja, botones) {
   };
 }
 
+// Billetes que se cuentan al cerrar, del más grande al más chico.
+const BILLETES = [20000, 10000, 2000, 1000, 500, 200, 100];
+
+// billetes = { 20000: 3, 1000: 5 } → total en pesos
+function sumarBilletes(billetes) {
+  const b = billetes || {};
+  return BILLETES.reduce((s, v) => s + v * (Number(b[v]) || 0), 0);
+}
+
+function hayBilletes(billetes) {
+  const b = billetes || {};
+  return BILLETES.some((v) => Number(b[v]) > 0);
+}
+
 // Efectivo contado contra lo que tiene que haber.
 function arqueo(contado, esperado) {
   const dif = contado - esperado;
@@ -644,6 +675,10 @@ function textoCierre(caja, club) {
   l.push('Tiene que haber: ' + plata(z.esperado));
   if (caja.efectivoContado !== null && caja.efectivoContado !== undefined) {
     l.push('Contado: ' + plata(caja.efectivoContado) + '. ' + arqueo(caja.efectivoContado, z.esperado).texto);
+    BILLETES.filter((v) => Number((caja.billetes || {})[v]) > 0).forEach((v) => {
+      const n = Number(caja.billetes[v]);
+      l.push('  ' + plata(v) + ' x ' + n + ' = ' + plata(v * n));
+    });
   }
   l.push('', 'Ventas anuladas: ' + z.anuladas + ' · ' + plata(z.anuladoMonto));
   return l.join('\n');
@@ -735,7 +770,7 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v7';
+const APP_VERSION = 'v8';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
@@ -992,6 +1027,29 @@ function arqueoHtml(c) {
   return `<span class="${a.coincide ? 'bien' : 'mal'}">${a.texto}</span>`;
 }
 
+function contarBilletes(c) {
+  const b = c.billetes || {};
+  return `<div class="billetes">
+    <div class="billete-fila billete-cabeza"><span>Billete</span><span>Cantidad</span><span>Subtotal</span></div>
+    ${BILLETES.map((v) => {
+      const n = Number(b[v]) || 0;
+      return `<div class="billete-fila">
+        <label class="billete-valor" for="bi-${v}">${plata(v)}</label>
+        <input id="bi-${v}" type="text" inputmode="numeric" enterkeyhint="next" data-campo="billete" data-billete="${v}" value="${n || ''}" placeholder="0" autocomplete="off">
+        <span class="billete-sub" id="bs-${v}">${n ? plata(v * n) : ''}</span>
+      </div>`;
+    }).join('')}
+    <div class="billetes-total"><span>Total contado</span><span class="condensada" id="total-contado">${plata(sumarBilletes(b))}</span></div>
+  </div>`;
+}
+
+// Solo lectura, para una caja cerrada: los billetes que se contaron.
+function detalleBilletes(c) {
+  if (!hayBilletes(c.billetes)) return '';
+  return `<div class="billetes billetes-leer">${BILLETES.filter((v) => Number(c.billetes[v]) > 0).map((v) =>
+    `<div class="billete-fila"><span class="billete-valor">${plata(v)}</span><span class="billete-n">x ${c.billetes[v]}</span><span class="billete-sub">${plata(v * c.billetes[v])}</span></div>`).join('')}</div>`;
+}
+
 function mensajeHtml() {
   return ui.mensaje ? `<div class="mensaje">${esc(ui.mensaje)}</div>` : '';
 }
@@ -1003,8 +1061,9 @@ function pantallaCierre() {
     <div class="desplaza cierre">
       ${papelCierre(caja)}
       <div class="campo">
-        <label for="contado">Efectivo contado</label>
-        <input id="contado" type="text" inputmode="numeric" data-campo="contado" value="${caja.efectivoContado === null ? '' : caja.efectivoContado}" placeholder="0" autocomplete="off">
+        <div class="etiqueta">Efectivo contado</div>
+        <div class="ayuda">Poné cuántos billetes hay de cada uno.</div>
+        ${contarBilletes(caja)}
         <div class="arqueo" id="arqueo">${arqueoHtml(caja)}</div>
       </div>
       ${mensajeHtml()}
@@ -1157,6 +1216,7 @@ function pantallaVieja() {
     <div class="desplaza cierre">
       ${papelCierre(c)}
       ${c.efectivoContado === null ? '' : `<div class="renglon-gris contado"><span>Efectivo contado</span><span class="condensada">${plata(c.efectivoContado)}</span></div>
+        ${detalleBilletes(c)}
         <div class="arqueo">${arqueoHtml(c)}</div>`}
       ${mensajeHtml()}
       <button type="button" class="b-secundario" data-accion="compartir">Compartir cierre</button>
@@ -1476,10 +1536,17 @@ app.addEventListener('input', (e) => {
     if (campo === 'b-titulo') b.titulo = v.toUpperCase();
     guardarConfig();
   }
-  if (campo === 'contado' && caja) {
-    const txt = e.target.value.replace(/\D/g, '');
-    const nueva = Object.assign({}, caja, { efectivoContado: txt === '' ? null : Number(txt) });
+  if (campo === 'billete' && caja) {
+    const v = Number(e.target.dataset.billete);
+    const n = soloNumero(e.target.value);
+    const billetes = Object.assign({}, caja.billetes);
+    if (n > 0) billetes[v] = n; else delete billetes[v];
+    const total = sumarBilletes(billetes);
+    // Sin ningún billete cargado no hay contado (todavía no se contó).
+    const nueva = Object.assign({}, caja, { billetes, efectivoContado: hayBilletes(billetes) ? total : null });
     if (G.guardarCaja(nueva)) caja = nueva;
+    document.getElementById('bs-' + v).textContent = n ? plata(v * n) : '';
+    document.getElementById('total-contado').textContent = plata(total);
     actualizarArqueo();
   }
   if (campo === 'pagador' && caja) {
@@ -1492,6 +1559,15 @@ app.addEventListener('input', (e) => {
     const err = document.getElementById('error-pagador');
     if (err) err.hidden = ok;
   }
+});
+
+// En la tabla de billetes, "siguiente" del teclado pasa al billete de abajo.
+app.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.target.dataset.campo !== 'billete') return;
+  e.preventDefault();
+  const todos = [...app.querySelectorAll('[data-campo="billete"]')];
+  const sig = todos[todos.indexOf(e.target) + 1];
+  if (sig) sig.focus(); else e.target.blur();
 });
 
 // Que la pantalla no se apague con la caja abierta, si el navegador lo permite.

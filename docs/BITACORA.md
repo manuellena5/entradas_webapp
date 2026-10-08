@@ -238,3 +238,31 @@ Con Chrome sin interfaz, emulando un teléfono táctil de 390 × 844: **36 compr
 
 - Probar "atrás" en el teléfono, con la app instalada. Chrome de escritorio no tiene botón atrás de teléfono, así que el cierre real de la app solo se puede ver en Android.
 - Ver el botón "Instalar la app" en el teléfono. Chrome lo ofrece solo si la app todavía no está instalada. Si antes se agregó como acceso directo ("Agregar a pantalla principal"), conviene borrar ese acceso directo.
+
+## Pedido de M: contar billetes en el cierre (07/10/2026, v8)
+
+### Qué se hizo
+
+- En Cierre de caja, "Efectivo contado" pasó a ser una **tabla de billetes**: $ 20.000, $ 10.000, $ 2.000, $ 1.000, $ 500, $ 200 y $ 100.
+  - Para cada uno se pone cuántos hay, y al lado aparece el subtotal.
+  - Abajo, **Total contado** con la suma.
+  - Ese total es el efectivo contado: se compara con "Tiene que haber" y muestra Coincide / Sobran / Faltan, igual que antes. Mientras no se cargue ningún billete, no se muestra la comparación.
+- Se guarda con cada número (`caja.billetes`) y sigue ahí al volver a entrar.
+- "Siguiente" en el teclado del teléfono pasa al billete de abajo.
+- El **cierre compartido** trae, debajo de "Contado", los billetes cargados (por ejemplo `$ 20.000 x 2 = $ 40.000`). El cierre de una caja cerrada también los muestra.
+- Se reemplazó el campo único de efectivo contado: ahora el contado sale siempre de los billetes.
+- Reglas nuevas en `<script id="reglas">`: `BILLETES`, `sumarBilletes`, `hayBilletes`.
+- `ESPECIFICACION.md` (sección 9) actualizada en los dos repos. En `PLAN.md` se agregó `billetes` a la forma de la caja.
+- `APP_VERSION` v8 / `CACHE_NAME` entradas-v8.
+
+### Qué se probó
+
+- `tests.html`: **96 comprobaciones en verde** (suma de billetes, uno de cada uno = $ 33.800, texto compartido con billetes, caja nueva sin billetes).
+- Prueba de punta a punta de W4, escribiendo con el teclado como una persona: **66 comprobaciones, todas bien.**
+  - 3 de $ 20.000: subtotal y total $ 60.000, "Sobran $ 9.000."
+  - 2 de $ 20.000 y 1 de $ 10.000: "Faltan $ 1.000.", en rojo.
+  - Sumando $ 500 + 2 de $ 200 + $ 100: total $ 51.000, "Coincide con lo esperado.", en verde.
+  - "Siguiente" pasa al billete de abajo. Borrar una cantidad la descuenta.
+  - Se guarda y sigue después de recargar. El texto compartido trae los billetes. La caja cerrada los muestra en modo lectura.
+- Se volvieron a correr W2 (58), W3 (36), W5 (51) y atrás/instalar (15): todo bien.
+- Arreglo visto en la captura: los valores de los billetes salían en letra chica, porque les ganaba el estilo de las etiquetas de los campos.

@@ -192,6 +192,17 @@ function correr() {
       '', 'Ventas anuladas: 1 · $ 16.000'], 'texto para WhatsApp, sin listar las transferencias una por una');
     igual(textoCierre(cajaDePrueba('visitante'), 'Club').includes('*Extras*'), false, 'de visitante, el texto no trae extras');
 
+    igual(BILLETES, [20000, 10000, 2000, 1000, 500, 200, 100], 'billetes: 20.000, 10.000, 2.000, 1.000, 500, 200 y 100');
+    igual([sumarBilletes({}), sumarBilletes(undefined), sumarBilletes({ 20000: 2, 10000: 1, 1000: 1 }), sumarBilletes({ 500: 3, 200: 4, 100: 7 })],
+      [0, 0, 51000, 3000], 'suma de billetes');
+    igual(sumarBilletes({ 20000: 1, 10000: 1, 2000: 1, 1000: 1, 500: 1, 200: 1, 100: 1 }), 33800, 'uno de cada uno: $ 33.800');
+    igual([hayBilletes({}), hayBilletes({ 100: 0 }), hayBilletes({ 100: 1 })], [false, false, true], 'si se cargó algún billete');
+    const cb = Object.assign({}, c, { billetes: { 20000: 2, 10000: 1, 1000: 1 }, efectivoContado: 51000 });
+    const tb = textoCierre(cb, 'Club Deportivo Mitre').split('\n');
+    const ib = tb.indexOf('Contado: $ 51.000. Coincide con lo esperado.');
+    igual(tb.slice(ib, ib + 4), ['Contado: $ 51.000. Coincide con lo esperado.', '  $ 20.000 x 2 = $ 40.000', '  $ 10.000 x 1 = $ 10.000', '  $ 1.000 x 1 = $ 1.000'], 'el texto compartido trae los billetes cargados');
+    igual(nuevaCaja({ condicion: 'local', botones: [], ahora: hora(15, 0) }).billetes, {}, 'una caja nueva arranca sin billetes');
+
     const csv = csvDetalle(c);
     igual(csv.charCodeAt(0), 0xFEFF, 'el CSV empieza con BOM (Excel lee bien las tildes)');
     const filasCsv = csv.slice(1).trim().split('\r\n').map((f) => f.split(';'));

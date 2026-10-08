@@ -224,7 +224,7 @@ Informe con forma de ticket. Todo sale de las ventas **no anuladas**, usando la 
 
 - Un botón oculto que tuvo ventas en esta caja igual aparece.
 - En las filas, el nombre del botón va en plural (Hombres, Mujeres, Jugadores).
-- **Efectivo contado:** campo para cargar lo que se contó. Muestra "Coincide con lo esperado.", "Sobran $ x." o "Faltan $ x."
+- **Efectivo contado:** se cuentan los billetes de $ 20.000, $ 10.000, $ 2.000, $ 1.000, $ 500, $ 200 y $ 100: para cada uno se pone cuántos hay, se ve el subtotal y abajo el total contado. Ese total se compara con "Tiene que haber" y muestra "Coincide con lo esperado.", "Sobran $ x." o "Faltan $ x." Mientras no se cargue ningún billete, no se muestra la comparación. El cierre compartido trae el total contado y los billetes cargados.
 - Botones: "Imprimir cierre" y "Cerrar caja".
 
 ## 10. Configurar
