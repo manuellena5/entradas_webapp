@@ -220,6 +220,8 @@ html { touch-action: manipulation; }
 .venta-der { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
 .venta-total { font-family: var(--f-titulo); font-weight: 700; font-size: 26px; line-height: 1; }
 .venta.anulada .venta-resumen, .venta.anulada .venta-total { text-decoration: line-through; }
+.venta-botones { display: flex; gap: 8px; }
+.b-lapiz { width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid var(--tinta); border-radius: 10px; background: var(--superficie); color: var(--tinta); }
 .b-anular { height: 44px; padding: 0 14px; border: 2px solid var(--rojo); border-radius: 10px; background: var(--superficie); color: var(--rojo); font-size: 15px; font-weight: 700; }
 .b-anular[aria-pressed="true"] { background: var(--rojo); color: #FFFFFF; }
 .marca-anulada { font-size: 14px; font-weight: 700; color: var(--rojo); text-transform: uppercase; letter-spacing: 0.04em; }
@@ -777,7 +779,7 @@ function crearGuardado(almacen) {
 </script>
 
 <script>
-const APP_VERSION = 'v11';
+const APP_VERSION = 'v12';
 
 const G = crearGuardado(localStorage);
 let config = G.config();
@@ -803,6 +805,8 @@ const ui = {
   editarAntes: null,   // cómo estaba ese botón al abrir el panel, para "Cancelar"
   editarNuevo: false,  // el botón se acaba de agregar: "Cancelar" no lo crea
   borrar: null,        // id del botón que pregunta "¿Borrar?"
+  pagadorDe: null,     // id de la venta por transferencia a la que se le anota quién transfirió
+  pagadorTexto: '',    // lo que se va escribiendo en ese panel (no se pierde si hay que reintentar)
   error: ''
 };
 
@@ -972,7 +976,31 @@ function tarjetaVenta(v) {
       <div class="venta-total">${plata(v.total)}</div>
       ${anulada
         ? '<div class="marca-anulada">Anulada</div>'
-        : `<button type="button" class="b-anular" data-accion="anular" data-valor="${v.id}" aria-pressed="${pide}">${pide ? '¿Anular?' : 'Anular'}</button>`}
+        : `<div class="venta-botones">
+          ${v.medio === 'transferencia' ? `<button type="button" class="b-lapiz" data-accion="editarPagador" data-valor="${v.id}" aria-label="Anotar quién transfirió">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="2.4"/></svg>
+          </button>` : ''}
+          <button type="button" class="b-anular" data-accion="anular" data-valor="${v.id}" aria-pressed="${pide}">${pide ? '¿Anular?' : 'Anular'}</button>
+        </div>`}
+    </div>
+  </div>`;
+}
+
+function panelPagador() {
+  const v = caja.ventas.find((x) => x.id === ui.pagadorDe);
+  if (!v) return '';
+  return `
+  <div class="velo">
+    <div class="panel">
+      <div class="panel-titulo">¿Quién transfirió?</div>
+      <div class="texto-panel">${esc(resumenLineas(v.lineas))} · ${horaTxt(v.fechaHora)} · ${plata(v.total)}</div>
+      <div class="campo">
+        <label for="pagador-editar">Nombre</label>
+        <input id="pagador-editar" type="text" enterkeyhint="done" value="${esc(ui.pagadorTexto)}" placeholder="Nombre (opcional)" autocomplete="off">
+      </div>
+      ${ui.error ? `<div class="error">${esc(ui.error)}</div>` : ''}
+      <button type="button" class="boton-grande b-listo" data-accion="guardarPagador">Guardar</button>
+      <button type="button" class="b-chico b-ancho" data-accion="noPagador">Cancelar</button>
     </div>
   </div>`;
 }
@@ -1353,6 +1381,7 @@ function render() {
   if (caja && ui.cobrada) html += panelCobrado();
   else if (caja && ui.cerrando) html += panelCerrar();
   else if (caja && ui.alias && pantalla === 'vender') html += panelAlias();
+  else if (caja && pantalla === 'ventas' && ui.pagadorDe) html += panelPagador();
   else if (pantalla === 'config' && ui.borrar) html += panelBorrar();
   else if (pantalla === 'config' && ui.editar) html += panelEditar();
   app.innerHTML = html;
@@ -1476,6 +1505,22 @@ const acciones = {
     ui.error = '';
   },
   noBorrar() { ui.borrar = null; ui.error = ''; },
+  editarPagador(id) {
+    ui.pagadorDe = Number(id);
+    ui.pagadorTexto = (caja.ventas.find((v) => v.id === ui.pagadorDe) || {}).pagador || '';
+    ui.error = '';
+  },
+  guardarPagador() {
+    const nombre = ui.pagadorTexto.trim();
+    const nueva = Object.assign({}, caja, {
+      ventas: caja.ventas.map((v) => (v.id === ui.pagadorDe ? Object.assign({}, v, { pagador: nombre }) : v))
+    });
+    if (!G.guardarCaja(nueva)) { ui.error = 'No se pudo guardar. Probá de nuevo.'; return; }
+    caja = nueva;
+    ui.pagadorDe = null;
+    ui.error = '';
+  },
+  noPagador() { ui.pagadorDe = null; ui.error = ''; },
   modo(m) { botonEditado().ticket = m; guardarConfig(); },
   visible() { const b = botonEditado(); b.visible = !b.visible; guardarConfig(); },
   socios() { config.sociosActivo = !config.sociosActivo; guardarConfig(); },
@@ -1594,6 +1639,7 @@ function actualizarArqueo() {
 app.addEventListener('input', (e) => {
   const campo = e.target.dataset.campo;
   if (campo === 'rival' || campo === 'fondo') ui.abrir[campo] = e.target.value;
+  if (e.target.id === 'pagador-editar') ui.pagadorTexto = e.target.value;
   if (campo && campo.indexOf('t-') === 0) {
     config.transf[{ 't-alias': 'alias', 't-titular': 'titular', 't-banco': 'banco' }[campo]] = e.target.value;
     guardarConfig();
@@ -1652,6 +1698,12 @@ app.addEventListener('input', (e) => {
 
 // En la tabla de billetes, "siguiente" del teclado pasa al billete de abajo.
 app.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'pagador-editar') {
+    e.preventDefault();
+    acciones.guardarPagador();
+    render();
+    return;
+  }
   if (e.key !== 'Enter' || e.target.dataset.campo !== 'billete') return;
   e.preventDefault();
   const todos = [...app.querySelectorAll('[data-campo="billete"]')];
@@ -1727,6 +1779,7 @@ app.addEventListener('contextmenu', (e) => { if (e.target.closest('.fila-config'
 // "Atrás" con un panel abierto lo cierra, sin salir ni avisar.
 function cerrarPanel() {
   if (ui.borrar) { acciones.noBorrar(); return true; }
+  if (ui.pagadorDe) { acciones.noPagador(); return true; }
   if (ui.editar) { acciones.cancelarEditar(); return true; }
   if (ui.cobrada) { acciones.siguiente(); return true; }
   if (ui.cerrando) { acciones.noCerrar(); return true; }

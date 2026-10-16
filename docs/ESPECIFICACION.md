@@ -182,6 +182,7 @@ La app **no verifica** transferencias. Se anotan y se concilian después contra 
 
 - Lista de ventas de la caja, la más nueva arriba: qué se vendió, hora, medio, total.
 - Las transferencias con nombre se leen "Transferencia de {nombre}".
+- Cada transferencia no anulada tiene un **lápiz** para anotar o cambiar quién transfirió, por si se saltó ese paso al cobrar. Abre "¿Quién transfirió?" con el nombre actual, "Guardar" y "Cancelar". Se guarda solo con Guardar (o con la tecla de listo del teclado). Puede quedar vacío.
 - Filtro por medio: **Todas**, **Efectivo**, **Transferencia**. Arriba se ve cuántas ventas y cuánto suman las que se están mirando, sin contar las anuladas. Sirve para controlar las transferencias contra el extracto.
 - "Anular" pide confirmación en el mismo botón (primer toque: "¿Anular?"; segundo toque: anula).
 - Una venta anulada queda en la lista, tachada y marcada "Anulada". No se borra ni se puede desanular.

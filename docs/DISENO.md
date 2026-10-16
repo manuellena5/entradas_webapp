@@ -17,7 +17,7 @@ M aprobó la estética del prototipo: **fácil de usar y con buena elección de 
 - **Se usa al sol.** Solo tema claro, contraste alto, nada de grises suaves para texto importante.
 - **El color no es el único indicador.** Lo seleccionado cambia de fondo y también de texto.
 - **Botones para dedos apurados.** Ningún botón mide menos de 44 px de alto.
-- **Sin adornos.** Sin degradados, sin sombras, sin íconos decorativos, sin emojis.
+- **Sin adornos.** Sin degradados, sin sombras, sin íconos decorativos, sin emojis. Los únicos íconos son los que se tocan y dicen qué hacen: el lápiz para anotar quién transfirió (en tinta, con borde, 44 × 44).
 
 ## Colores
 
@@ -106,7 +106,7 @@ El contador sobre el botón usa el color del texto como fondo, y tinta o blanco 
 2. **Vender.** Barra con el rival, Local o Visitante, botón "Alias" y cuántos ingresaron. Selector de socio si está activado. Botones en dos columnas: entradas y extras. Bajo el título "No pagan entrada", los grises van uno por fila, a lo ancho: en dos columnas el contador taparía el nombre (cambio respecto del prototipo, aprobado por M). Franja blanca con resumen y total. Efectivo y Transferencia. Pestañas.
 3. **Cobrado** (panel). Ver sección 6 de la especificación.
 4. **Alias** (panel). Alias en 44 px para que se lea a un metro.
-5. **Ventas.** Tarjetas blancas, una por venta. Las anuladas en gris, tachadas.
+5. **Ventas.** Filtro Todas / Efectivo / Transferencia. Tarjetas blancas, una por venta. Las anuladas en gris, tachadas. En las transferencias, el lápiz a la izquierda de "Anular".
 6. **Cierre.** El informe con aspecto de papel, campo de efectivo contado, "Imprimir cierre" y "Cerrar caja".
 7. **Configurar.** Arriba, "Tocá un botón para cambiarlo. Mantenelo apretado para borrarlo." Lista por grupos con "Cambiar" a la derecha de cada fila y un botón de borde punteado para agregar. Mientras se mantiene apretada, la fila se oscurece de a poco. Después, Socios y Datos para transferir.
 8. **Cambiar un botón** (panel). Nombre, precio, modo de ticket con su explicación debajo, título del ticket, "Se muestra para vender", "Listo" y debajo "Cancelar".

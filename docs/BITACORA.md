@@ -338,3 +338,29 @@ Con Chrome sin interfaz, emulando un teléfono táctil: **26 comprobaciones nuev
 ### Falta
 
 - Probar en el teléfono el "mantener apretado" con el dedo (que no salte el menú del sistema ni se seleccione texto) y el "atrás" de Android con los paneles.
+
+## Pedido de M: anotar quién transfirió desde Ventas (16/10/2026, v12)
+
+### Qué se hizo
+
+- En Ventas, cada **transferencia no anulada** tiene un **lápiz** (44 × 44, a la izquierda de "Anular"). Sirve para cuando al cobrar se saltó el paso de anotar el nombre.
+- El lápiz abre el panel **"¿Quién transfirió?"**:
+  - muestra de qué venta se trata (qué se vendió, hora y total) y el nombre actual, o vacío;
+  - tiene "Guardar" y "Cancelar".
+  - Se guarda solo con "Guardar" o con la tecla de listo del teclado, no mientras se escribe, para que Cancelar no cambie nada. Puede quedar vacío.
+  - "Atrás" del teléfono lo cierra sin cambiar nada.
+- Lo corregido se ve enseguida ("Transferencia de Ana"), también con el filtro Transferencia, y sale en el detalle para Excel.
+- Arreglo encontrado al probar: si guardar fallaba, al reintentar se perdía lo que se había escrito. Ahora lo escrito se mantiene.
+- `ESPECIFICACION.md` (sección 7) y `DISENO.md` (principios y pantalla Ventas), en los dos repos. `DISENO.md` deja dicho que el lápiz es la excepción a "sin íconos": es un ícono que se toca, no un adorno.
+- `APP_VERSION` v12 / `CACHE_NAME` entradas-v12.
+
+### Qué se probó
+
+Con Chrome sin interfaz, emulando un teléfono táctil: **20 comprobaciones nuevas, todas bien.**
+
+- El lápiz aparece solo en las transferencias no anuladas (no en efectivo ni en anuladas) y mide al menos 44 px.
+- Agregar el nombre que faltaba: el panel abre vacío y no guarda mientras se escribe. "Guardar" deja "Transferencia de Ana".
+- Cambiar uno existente: abre con "Juan". Cancelar y "atrás" no cambian nada (y "atrás" no avisa para salir). Enter guarda "Juan Pérez". Se puede dejar vacío.
+- Funciona con el filtro Transferencia. Los nombres siguen al volver a entrar y salen en el CSV. Sin red también guarda.
+- Con el almacenamiento lleno avisa y no pierde el nombre anterior; al reintentar guarda lo escrito.
+- Se volvieron a correr W2 (58), W3 (36), W4 (72), W5 (62), atrás/instalar (15) y borrar (26): todo bien.
